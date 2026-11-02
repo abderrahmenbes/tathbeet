@@ -68,9 +68,22 @@ tr:nth-child(even) td:has(>.nm){background:var(--stripe)}
 .note{background:var(--gold2);border-radius:14px;padding:10px 14px;font-size:13px;margin-bottom:14px;border-right:3px solid var(--gold)}
 .seal{width:92px;height:92px;margin:0 auto 12px;background:var(--btn);color:#fff;display:grid;place-items:center;font-size:40px;clip-path:polygon(50% 0%,63.8% 16.7%,85.4% 14.6%,83.3% 36.2%,100% 50%,83.3% 63.8%,85.4% 85.4%,63.8% 83.3%,50% 100%,36.2% 83.3%,14.6% 85.4%,16.7% 63.8%,0% 50%,16.7% 36.2%,14.6% 14.6%,36.2% 16.7%)}
 .streak{background:var(--gold2);border-radius:14px;padding:10px 12px;margin:0 0 16px;font-weight:500;font-size:14px;border-right:3px solid var(--gold)}
+.pt{display:none}
+.sv{display:flex;flex-direction:column;gap:10px}
+.st{border:1px solid var(--bd);border-right:5px solid var(--bd);border-radius:16px;padding:12px 12px 10px;background:var(--card)}
+.st.s-ok{border-right-color:var(--ok)}.st.s-warn{border-right-color:var(--gold)}.st.s-bad{border-right-color:var(--bad)}
+.sh{display:flex;align-items:center;gap:8px}.sh .nm{flex:1;min-width:0;font-weight:700;font-size:15px;overflow-wrap:anywhere}.sh .dt{flex:1;font-weight:700;font-size:15px}
+.ix{width:24px;height:24px;border-radius:50%;background:var(--pr2);color:var(--pr);font-size:12px;display:grid;place-items:center;flex:none}
+.c-ok{background:var(--okbg);color:var(--ok)}.c-warn{background:var(--warnbg);color:var(--warn)}.c-bad{background:var(--badbg);color:var(--bad)}
+.ig{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.ib{display:flex;justify-content:space-between;align-items:center;gap:6px;background:var(--stripe);border-radius:10px;padding:6px 10px;font-size:12px;color:var(--mu)}
+.pl{display:inline-block;min-width:34px;text-align:center;padding:1px 9px;border-radius:99px;font-weight:700;font-size:12px;background:var(--pr2);color:var(--mu)}
+.pl.ok{background:var(--okbg);color:var(--ok)}.pl.bad{background:var(--badbg);color:var(--bad)}
+.sa{display:flex;margin-top:10px}.sa button{font-size:12px;padding:6px 12px;opacity:.9}.pc{color:var(--pr);font-size:17px}
+.mt{color:var(--mu);font-size:12px;margin-top:8px}.mt b{color:var(--tx)}.ms{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
 .po{display:none}.dh{font-family:"Reem Kufi",sans-serif;font-weight:700;margin:16px 0 4px;color:var(--pr)}label{font-size:13px;color:var(--mu)}
 @media (prefers-reduced-motion:no-preference){.seal{animation:pop .45s ease-out}@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}}
-@media print{:root{--bg:#fff;--card:#fff;--tx:#10231F;--mu:#4a5d57;--pr:#0E5C4E;--btn:#0E5C4E;--pr2:#E2EEE9;--bd:#cdd9d4;--gold:#B8923A;--gold2:#F6EEDA;--bad:#A8432F;--badbg:#F8E5E0;--ok:#0E5C4E;--okbg:#DAEEE6;--warn:#85570A;--warnbg:#F8EAC6;--hd1:#08332D;--hd2:#0E5C4E;--stripe:#F3F8F6}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}.noprint{display:none!important}.po{display:block;text-align:center;font-weight:700;font-size:18px;margin-bottom:10px}.card{border:0;padding:0}.card.frame{border:2px solid var(--gold);padding:12px}body{background:#fff}.w{max-width:none;padding:0}.sc{overflow:visible}.nmh,td:has(>.nm){position:static;box-shadow:none}}
+@media print{.pt{display:block!important}.sv{display:none!important}:root{--bg:#fff;--card:#fff;--tx:#10231F;--mu:#4a5d57;--pr:#0E5C4E;--btn:#0E5C4E;--pr2:#E2EEE9;--bd:#cdd9d4;--gold:#B8923A;--gold2:#F6EEDA;--bad:#A8432F;--badbg:#F8E5E0;--ok:#0E5C4E;--okbg:#DAEEE6;--warn:#85570A;--warnbg:#F8EAC6;--hd1:#08332D;--hd2:#0E5C4E;--stripe:#F3F8F6}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}.noprint{display:none!important}.po{display:block;text-align:center;font-weight:700;font-size:18px;margin-bottom:10px}.card{border:0;padding:0}.card.frame{border:2px solid var(--gold);padding:12px}body{background:#fff}.w{max-width:none;padding:0}.sc{overflow:visible}.nmh,td:has(>.nm){position:static;box-shadow:none}}
 </style></head><body><header class="hd noprint"><div class="bsm">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div><h1>تثبيت القرآن</h1><div class="tg">استعدادًا لشهر رمضان المبارك</div><div class="sub"><span id="today"></span> &nbsp;•&nbsp; <span id="hj"></span></div></header>
 <div class="w">
 <div id="app"><div class="msg">جارٍ التحميل…</div></div></div>
@@ -195,15 +208,24 @@ function adminView(){
   const rep=n=>reports.find(x=>x.date===ds&&x.name===n);
   const used=KEYS.filter(k=>(SCHED[i][k]&&String(SCHED[i][k]).trim())||reports.some(r=>r.date===ds&&k in r.v));
   const rows=all.map(n=>({n,r:rep(n)})).sort((a,b)=>(a.r?1:0)-(b.r?1:0)||a.n.localeCompare(b.n,"ar"));
-  h+=`<div class="po">تقرير تثبيت القرآن — ${fmt(ds)}</div><div class="card"><div class="t tt">${DAYS[i]} ${ds} — ${rows.filter(x=>x.r).length} من ${rows.length} أرسلوا</div><div class="sc"><table><tr><th class="nmh">الطالب</th>${used.map(k=>`<th>${LBL[k]}</th>`).join("")}<th>الحالة</th><th class="noprint"></th></tr>`;
+  h+=`<div class="po">تقرير تثبيت القرآن — ${fmt(ds)}</div><div class="card"><div class="t tt">${DAYS[i]} ${ds} — ${rows.filter(x=>x.r).length} من ${rows.length} أرسلوا</div>${dailyCards(rows,i,ds,used)}<div class="sc pt"><table><tr><th class="nmh">الطالب</th>${used.map(k=>`<th>${LBL[k]}</th>`).join("")}<th>الحالة</th><th class="noprint"></th></tr>`;
   rows.forEach((x,j)=>{h+=`<tr><td>${nmLink(x.n)}</td>${used.map(k=>x.r?(k in x.r.v?cell(k,i,x.r.v[k]):'<td>—</td>'):'<td class="bad">—</td>').join("")}<td class="${x.r?(x.r.late?"warn":"ok"):"bad"}"><span class="chip">${x.r?(x.r.late?"متأخر":"أرسل"):"لم يقرأ ورده"}</span></td><td class="noprint">${x.r?`<button class="s g" data-n="${esc(x.n)}" data-d="${ds}" onclick="delReport(this.dataset.n,this.dataset.d)">🗑</button>`:`<button class="s g bad" data-n="${esc(x.n)}" onclick="delStudent(this.dataset.n)">حذف الطالب</button>`}</td></tr>`});
   return h+`</table></div></div><div class="noprint" style="margin-bottom:12px"><button onclick="window.print()">📄 حفظ التقرير PDF</button></div><div class="noprint row" style="margin-bottom:12px"><button class="g" style="flex:2" onclick="waShare()">📤 إرسال للواتساب</button><button class="g" onclick="waCopy()">📋 نسخ</button></div>`+foot}
  const days=pdays(),pl={week:"هذا الأسبوع",month:"هذا الشهر"};
  if(!days.length)return h+`<div class="card msg">لم يبدأ البرنامج بعد (${fmt(START)})</div>`+foot;
  const rows=all.map(n=>stat(n,days)).sort((a,b)=>a.sent-b.sent);
- h+=`<div class="po">تقرير ${pl[period]}</div><div class="card"><div class="t tt">تقرير ${pl[period]} (${days.length} يوم)</div><div class="sc"><table><tr><th class="nmh">الطالب</th><th>أيام الإرسال</th><th>الإنجاز</th><th>تأخر</th><th>أيام لم يقرأ فيها ورده</th></tr>`;
+ h+=`<div class="po">تقرير ${pl[period]}</div><div class="card"><div class="t tt">تقرير ${pl[period]} (${days.length} يوم)</div>${weekCards(rows,days)}<div class="sc pt"><table><tr><th class="nmh">الطالب</th><th>أيام الإرسال</th><th>الإنجاز</th><th>تأخر</th><th>أيام لم يقرأ فيها ورده</th></tr>`;
  rows.forEach(r=>{h+=`<tr><td>${nmLink(r.n)}</td><td>${r.sent}/${days.length}</td><td style="min-width:90px">${r.pct}%<div class="bar"><i style="width:${r.pct}%"></i></div></td><td>${r.late}</td><td class="bad" style="white-space:normal">${r.miss.map(d=>DAYS[d.i]+" "+d.ds.slice(5)).join("، ")||"—"}</td></tr>`});
  return h+`</table></div></div><div class="noprint" style="margin-bottom:12px"><button onclick="window.print()">📄 حفظ التقرير PDF</button></div>`+foot}
+function pl(k,day,x){const m=maxOf(k,day),ok=okv(k,day,x);return `<span class="pl ${ok?"ok":"bad"}">${m?(x==null?0:x)+"/"+m:(x===1?"✓":"✕")}</span>`}
+function igrid(r,day,used){return `<div class="ig">${used.map(k=>`<div class="ib"><span>${LBL[k]}</span>${k in r.v?pl(k,day,r.v[k]):'<span class="pl">—</span>'}</div>`).join("")}</div>`}
+function kindOf(r,day){if(!r)return["s-bad","c-bad","لم يقرأ ورده"];const full=Object.keys(r.v).every(k=>okv(k,day,r.v[k]));if(r.late)return["s-warn","c-warn","متأخر"];return full?["s-ok","c-ok","أتمّ ورده"]:["s-warn","c-warn","ورد ناقص"]}
+function dailyCards(rows,i,ds,used){return `<div class="sv">`+rows.map((x,j)=>{const [t,c,l]=kindOf(x.r,i);
+ return `<div class="st ${t}"><div class="sh"><span class="ix">${j+1}</span>${nmLink(x.n)}<span class="chip ${c}">${l}</span></div>${x.r?igrid(x.r,i,used):""}<div class="sa noprint">${x.r?`<button class="s g" data-n="${esc(x.n)}" data-d="${ds}" onclick="delReport(this.dataset.n,this.dataset.d)">🗑 حذف التقرير</button>`:`<button class="s g bad" data-n="${esc(x.n)}" onclick="delStudent(this.dataset.n)">حذف الطالب</button>`}</div></div>`}).join("")+`</div>`}
+function weekCards(rows,days){return `<div class="sv">`+rows.map((r,j)=>{const t=r.pct>=80?"s-ok":r.pct>=40?"s-warn":"s-bad";
+ return `<div class="st ${t}"><div class="sh"><span class="ix">${j+1}</span>${nmLink(r.n)}<b class="pc">${r.pct}%</b></div><div class="bar" style="margin-top:8px"><i style="width:${r.pct}%"></i></div><div class="mt">أيام الإرسال <b>${r.sent}/${days.length}</b> • التأخر <b>${r.late}</b></div>${r.miss.length?`<div class="mt">أيام لم يقرأ فيها ورده:</div><div class="ms">${r.miss.map(d=>`<span class="chip c-bad">${DAYS[d.i]} ${d.ds.slice(5)}</span>`).join("")}</div>`:""}</div>`}).join("")+`</div>`}
+function detailCards(all,byd){return `<div class="sv">`+all.slice().reverse().map(d=>{const r=byd[d.ds],[t,c,l]=kindOf(r,d.i);
+ return `<div class="st ${t}"><div class="sh"><span class="dt">${DAYS[d.i]} ${d.ds.slice(5)}</span><span class="chip ${c}">${l}</span></div>${r?igrid(r,d.i,KEYS.filter(k=>k in r.v))+`<div class="sa noprint"><button class="s g" data-n="${esc(detail)}" data-d="${d.ds}" onclick="delReport(this.dataset.n,this.dataset.d)">🗑 حذف التقرير</button></div>`:""}</div>`}).join("")+`</div>`}
 function waText(){
  const ds=viewDate,i=dayIdx(new Date(ds+"T00:00:00"));
  const all=[...new Set([...students,...reports.map(r=>r.name)])].sort((a,b)=>a.localeCompare(b,"ar"));
@@ -229,7 +251,7 @@ function detailView(){
  <div class="v">أيام الإرسال: <b>${st.sent}</b> من ${all.length} — الغياب: <b class="bad">${st.miss.length}</b> — التأخر: <b>${st.late}</b></div>
  <div style="margin-top:8px">نسبة الإنجاز: ${st.pct}%<div class="bar"><i style="width:${st.pct}%"></i></div></div></div>`;
  if(!all.length)return h+`<div class="card msg">لم يبدأ البرنامج بعد</div>`;
- h+=`<div class="card"><div class="sc"><table><tr><th>التاريخ</th>${KEYS.map(k=>`<th>${LBL[k]}</th>`).join("")}<th></th><th class="noprint"></th></tr>`;
+ h+=`<div class="card">${detailCards(all,byd)}<div class="sc pt"><table><tr><th>التاريخ</th>${KEYS.map(k=>`<th>${LBL[k]}</th>`).join("")}<th></th><th class="noprint"></th></tr>`;
 all.slice().reverse().forEach(d=>{const r=byd[d.ds];
   if(!r){h+=`<tr><td>${DAYS[d.i]} ${d.ds.slice(5)}</td><td class="bad" colspan="6"><span class="chip">لم يقرأ ورده</span></td></tr>`;return}
   h+=`<tr><td>${DAYS[d.i]} ${d.ds.slice(5)}</td>${KEYS.map(k=>k in r.v?cell(k,d.i,r.v[k]):"<td>—</td>").join("")}<td class="${r.late?"warn":"ok"}"><span class="chip">${r.late?"متأخر":"أرسل"}</span></td><td class="noprint"><button class="s g" data-n="${esc(n)}" data-d="${d.ds}" onclick="delReport(this.dataset.n,this.dataset.d)">🗑</button></td></tr>`});
