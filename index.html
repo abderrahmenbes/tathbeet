@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E5C4E"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
 <title>برنامج تثبيت القرآن</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -81,6 +82,7 @@ tr:nth-child(even) td:has(>.nm){background:var(--stripe)}
 .pl.ok{background:var(--okbg);color:var(--ok)}.pl.bad{background:var(--badbg);color:var(--bad)}
 .sa{display:flex;margin-top:10px}.sa button{font-size:12px;padding:6px 12px;opacity:.9}.pc{color:var(--pr);font-size:17px}
 .mt{color:var(--mu);font-size:12px;margin-top:8px}.mt b{color:var(--tx)}.ms{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.55);display:grid;place-items:center;padding:20px;z-index:99}
 .po{display:none}.dh{font-family:"Reem Kufi",sans-serif;font-weight:700;margin:16px 0 4px;color:var(--pr)}label{font-size:13px;color:var(--mu)}
 @media (prefers-reduced-motion:no-preference){.seal{animation:pop .45s ease-out}@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}}
 @media print{.pt{display:block!important}.sv{display:none!important}:root{--bg:#fff;--card:#fff;--tx:#10231F;--mu:#4a5d57;--pr:#0E5C4E;--btn:#0E5C4E;--pr2:#E2EEE9;--bd:#cdd9d4;--gold:#B8923A;--gold2:#F6EEDA;--bad:#A8432F;--badbg:#F8E5E0;--ok:#0E5C4E;--okbg:#DAEEE6;--warn:#85570A;--warnbg:#F8EAC6;--hd1:#08332D;--hd2:#0E5C4E;--stripe:#F3F8F6}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}.noprint{display:none!important}.po{display:block;text-align:center;font-weight:700;font-size:18px;margin-bottom:10px}.card{border:0;padding:0}.card.frame{border:2px solid var(--gold);padding:12px}body{background:#fff}.w{max-width:none;padding:0}.sc{overflow:visible}.nmh,td:has(>.nm){position:static;box-shadow:none}}
@@ -135,7 +137,7 @@ function studentView(){
  const foot=`<div class="lk"><a onclick="goAdmin()">دخول المشرف</a></div>`;
  if(!me){const v=($("nm")&&$("nm").value)||"";
   return `<div class="card"><div class="t">السلام عليكم ورحمة الله</div><div class="v" style="margin-bottom:10px">اكتب اسمك للدخول</div><div class="note">⚠ تنبيه: اكتب اسمك بنفس الطريقة في كل مرة (نفس الحروف والترتيب)، لأن تقريرك وإحصائياتك مرتبطة بالاسم.</div>
-  <input id="nm" type="text" value="${esc(v)}" placeholder="الاسم" oninput="sugg()" autocomplete="off">
+  <input id="nm" type="text" value="${esc(v)}" placeholder="الاسم" oninput="sugg()" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
   <div class="sug" id="sg">${sugHtml(v)}</div>
   <button onclick="login($('nm').value)">دخول</button></div>${foot}`}
  const head=`<div class="card" style="display:flex;justify-content:space-between;align-items:center"><div><div class="v">الطالب</div><div class="t">${esc(me)}</div></div><button class="s g" onclick="logout()">تغيير</button></div>`;
@@ -210,7 +212,7 @@ function adminView(){
   const rows=all.map(n=>({n,r:rep(n)})).sort((a,b)=>(a.r?1:0)-(b.r?1:0)||a.n.localeCompare(b.n,"ar"));
   h+=`<div class="po">تقرير تثبيت القرآن — ${fmt(ds)}</div><div class="card"><div class="t tt">${DAYS[i]} ${ds} — ${rows.filter(x=>x.r).length} من ${rows.length} أرسلوا</div>${dailyCards(rows,i,ds,used)}<div class="sc pt"><table><tr><th class="nmh">الطالب</th>${used.map(k=>`<th>${LBL[k]}</th>`).join("")}<th>الحالة</th><th class="noprint"></th></tr>`;
   rows.forEach((x,j)=>{h+=`<tr><td>${nmLink(x.n)}</td>${used.map(k=>x.r?(k in x.r.v?cell(k,i,x.r.v[k]):'<td>—</td>'):'<td class="bad">—</td>').join("")}<td class="${x.r?(x.r.late?"warn":"ok"):"bad"}"><span class="chip">${x.r?(x.r.late?"متأخر":"أرسل"):"لم يقرأ ورده"}</span></td><td class="noprint">${x.r?`<button class="s g" data-n="${esc(x.n)}" data-d="${ds}" onclick="delReport(this.dataset.n,this.dataset.d)">🗑</button>`:`<button class="s g bad" data-n="${esc(x.n)}" onclick="delStudent(this.dataset.n)">حذف الطالب</button>`}</td></tr>`});
-  return h+`</table></div></div><div class="noprint" style="margin-bottom:12px"><button onclick="window.print()">📄 حفظ التقرير PDF</button></div><div class="noprint row" style="margin-bottom:12px"><button class="g" style="flex:2" onclick="waShare()">📤 إرسال للواتساب</button><button class="g" onclick="waCopy()">📋 نسخ</button></div>`+foot}
+  return h+`</table></div></div><div class="noprint" style="margin-bottom:12px"><button onclick="window.print()">📄 حفظ التقرير PDF</button></div><div class="noprint row" style="margin-bottom:12px"><button class="g" style="flex:2" onclick="waPdf()">📤 إرسال PDF للواتساب</button><button class="g" onclick="waCopy()">📋 نسخ نصي</button></div>`+foot}
  const days=pdays(),pl={week:"هذا الأسبوع",month:"هذا الشهر"};
  if(!days.length)return h+`<div class="card msg">لم يبدأ البرنامج بعد (${fmt(START)})</div>`+foot;
  const rows=all.map(n=>stat(n,days)).sort((a,b)=>a.sent-b.sent);
@@ -226,6 +228,67 @@ function weekCards(rows,days){return `<div class="sv">`+rows.map((r,j)=>{const t
  return `<div class="st ${t}"><div class="sh"><span class="ix">${j+1}</span>${nmLink(r.n)}<b class="pc">${r.pct}%</b></div><div class="bar" style="margin-top:8px"><i style="width:${r.pct}%"></i></div><div class="mt">أيام الإرسال <b>${r.sent}/${days.length}</b> • التأخر <b>${r.late}</b></div>${r.miss.length?`<div class="mt">أيام لم يقرأ فيها ورده:</div><div class="ms">${r.miss.map(d=>`<span class="chip c-bad">${DAYS[d.i]} ${d.ds.slice(5)}</span>`).join("")}</div>`:""}</div>`}).join("")+`</div>`}
 function detailCards(all,byd){return `<div class="sv">`+all.slice().reverse().map(d=>{const r=byd[d.ds],[t,c,l]=kindOf(r,d.i);
  return `<div class="st ${t}"><div class="sh"><span class="dt">${DAYS[d.i]} ${d.ds.slice(5)}</span><span class="chip ${c}">${l}</span></div>${r?igrid(r,d.i,KEYS.filter(k=>k in r.v))+`<div class="sa noprint"><button class="s g" data-n="${esc(detail)}" data-d="${d.ds}" onclick="delReport(this.dataset.n,this.dataset.d)">🗑 حذف التقرير</button></div>`:""}</div>`}).join("")+`</div>`}
+const H2C="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js",JSPDF="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js";
+const PDFCSS=`:root{--pr:#0E5C4E;--gold:#B8923A;--gold2:#F6EEDA;--bd:#D5E1DC;--stripe:#F3F8F6;--mu:#5A6F68;--ok:#0E5C4E;--okbg:#DAEEE6;--bad:#A8432F;--badbg:#F8E5E0;--warn:#85570A;--warnbg:#F8EAC6}
+*{box-sizing:border-box}html,body{margin:0;background:#fff}
+body{width:794px;padding:40px 36px;font-family:"IBM Plex Sans Arabic","Noto Sans Arabic",Tahoma,sans-serif;color:#10231F;font-size:12px}
+.hd{background:linear-gradient(165deg,#08332D,#0E5C4E);color:#F6EFD8;text-align:center;padding:16px 12px 18px;border-radius:18px;margin-bottom:12px;border-bottom:4px solid var(--gold)}
+.bsm{font-family:Amiri,serif;color:#E6CC85;font-size:16px}.hd h1{font-family:"Reem Kufi",sans-serif;font-size:28px;margin:2px 0;color:#fff}
+.hd .sub{color:#E6CC85;font-size:12px}
+.sum{display:flex;gap:8px;margin-bottom:12px}.sum div{flex:1;border-radius:12px;padding:8px;text-align:center;font-weight:700}
+.sum small{display:block;font-weight:500;font-size:11px}
+table{border-collapse:separate;border-spacing:0;width:100%;border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+th{background:linear-gradient(180deg,#0E5C4E,#08332D);color:#F6EFD8;font-family:"Reem Kufi",sans-serif;font-weight:500;padding:9px 8px;text-align:right;border-bottom:3px solid var(--gold)}
+td{padding:7px 8px;border-bottom:1px solid var(--bd);text-align:right}tr:nth-child(even) td{background:var(--stripe)}
+.num{color:var(--mu);width:28px}.nm{font-weight:500}
+.pill,.chip{display:inline-block;border-radius:99px;font-weight:700;padding:1px 10px}.pill{min-width:34px;text-align:center}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+.ok .pill,.ok .chip{background:var(--okbg)}.bad .pill,.bad .chip{background:var(--badbg)}.warn .chip{background:var(--warnbg)}
+.ft{text-align:center;font-family:Amiri,serif;color:var(--gold);font-size:16px;margin-top:12px}`;
+const gfmt=ds=>new Intl.DateTimeFormat("ar",{timeZone:"UTC",day:"numeric",month:"long",year:"numeric"}).format(new Date(ds+"T00:00:00Z"));
+const hfmt=ds=>{try{return new Intl.DateTimeFormat("ar-SA-u-ca-islamic-umalqura",{timeZone:"UTC",day:"numeric",month:"long",year:"numeric"}).format(new Date(ds+"T00:00:00Z"))}catch(e){return""}};
+function pdfHtml(ds){
+ const i=dayIdx(new Date(ds+"T00:00:00"));
+ const names=[...new Set([...students,...reports.map(r=>r.name)])];
+ const used=KEYS.filter(k=>(SCHED[i][k]&&String(SCHED[i][k]).trim())||reports.some(r=>r.date===ds&&k in r.v));
+ const rows=names.map(n=>{const r=reports.find(x=>x.date===ds&&x.name===n);const bad=r?Object.keys(r.v).filter(k=>!okv(k,i,r.v[k])):[];return{n,r,kind:!r?2:bad.length?1:0}}).sort((a,b)=>a.kind-b.kind||a.n.localeCompare(b.n,"ar"));
+ const c=[0,0,0];rows.forEach(x=>c[x.kind]++);
+ const cellp=(k,r)=>{if(!r)return`<td class="bad"><span class="pill">—</span></td>`;if(!(k in r.v))return"<td>—</td>";const m=maxOf(k,i),x=r.v[k],ok=okv(k,i,x);return`<td class="${ok?"ok":"bad"}"><span class="pill">${m?x+"/"+m:x===1?"✓":"✕"}</span></td>`};
+ const st=x=>x.kind===2?`<td class="bad"><span class="chip">لم يقرأ ورده</span></td>`:x.r.late?`<td class="warn"><span class="chip">متأخر</span></td>`:x.kind===1?`<td class="warn"><span class="chip">ورد ناقص</span></td>`:`<td class="ok"><span class="chip">أتمّ ورده</span></td>`;
+ const body=rows.map((x,j)=>`<tr><td class="num">${j+1}</td><td class="nm">${esc(x.n)}</td>${used.map(k=>cellp(k,x.r)).join("")}${st(x)}</tr>`).join("");
+ const h=hfmt(ds);
+ return `<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=Reem+Kufi:wght@500;700&display=swap" rel="stylesheet"><style>${PDFCSS}</style></head><body>
+<div class="hd"><div class="bsm">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div><h1>تقرير تثبيت القرآن</h1><div class="sub">${DAYS[i]} — ${gfmt(ds)}${h?" • "+h:""}</div></div>
+<div class="sum"><div style="background:var(--okbg);color:var(--ok)">${c[0]}<small>أتمّوا أوردتهم</small></div><div style="background:var(--warnbg);color:var(--warn)">${c[1]}<small>ورد ناقص</small></div><div style="background:var(--badbg);color:var(--bad)">${c[2]}<small>لم يقرؤوا أوردتهم</small></div></div>
+<table><thead><tr><th>#</th><th>الطالب</th>${used.map(k=>`<th>${LBL[k]}</th>`).join("")}<th>الحالة</th></tr></thead><tbody>${body}</tbody></table>
+<div class="ft">وَرَتِّلِ الْقُرْآنَ تَرْتِيلًا</div></body></html>`}
+function pagesFor(H,bottoms){const P=1123,pg=[];let y=0;while(y<H-1){const lim=y+P;if(lim>=H){pg.push([y,H]);break}let e=0;for(const b of bottoms)if(b<=lim&&b>y+200)e=Math.max(e,b);if(!e)e=lim;pg.push([y,e]);y=e}return pg}
+const loadLib=src=>new Promise((res,rej)=>{if(document.querySelector('script[data-l="'+src+'"]'))return res();const s=document.createElement("script");s.src=src;s.dataset.l=src;s.onload=res;s.onerror=()=>rej(new Error("lib"));document.head.appendChild(s)});
+async function makePdf(ds){
+ await loadLib(H2C);await loadLib(JSPDF);
+ const f=document.createElement("iframe");f.style.cssText="position:fixed;left:-9999px;top:0;width:794px;height:1200px;border:0";document.body.appendChild(f);
+ try{
+  const loaded=new Promise(r=>f.onload=r);f.srcdoc=pdfHtml(ds);await loaded;
+  const doc=f.contentDocument;try{await doc.fonts.ready}catch(e){}
+  await new Promise(r=>setTimeout(r,400));
+  const H=Math.ceil(doc.body.scrollHeight);f.style.height=H+"px";
+  await new Promise(r=>setTimeout(r,150));
+  const bottoms=[...doc.querySelectorAll("tr")].map(tr=>Math.ceil(tr.getBoundingClientRect().bottom));
+  const cv=await html2canvas(doc.body,{scale:2,backgroundColor:"#ffffff",useCORS:true,windowWidth:794,windowHeight:H});
+  const {jsPDF}=window.jspdf,pdf=new jsPDF({unit:"mm",format:"a4",orientation:"p"});
+  pagesFor(H,bottoms).forEach((p,j)=>{const hh=(p[1]-p[0])*2,sl=document.createElement("canvas");sl.width=cv.width;sl.height=hh;const g=sl.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,sl.width,hh);g.drawImage(cv,0,p[0]*2,cv.width,hh,0,0,cv.width,hh);if(j)pdf.addPage();pdf.addImage(sl.toDataURL("image/png"),"PNG",0,0,210,(p[1]-p[0])/794*210)});
+  return new File([pdf.output("blob")],"tathbeet-"+ds+".pdf",{type:"application/pdf"});
+ }finally{f.remove()}}
+let pdfFile=null;
+function ovShow(h){let o=$("ov");if(!o){o=document.createElement("div");o.id="ov";o.className="ov noprint";document.body.appendChild(o)}o.innerHTML=`<div class="card" style="width:100%;max-width:360px;margin:0">${h}</div>`}
+function ovClose(){const o=$("ov");if(o)o.remove()}
+async function waPdf(){
+ ovShow(`<div class="msg">جارٍ تجهيز ملف PDF…<br>قد يستغرق بضع ثوانٍ</div>`);
+ try{pdfFile=await makePdf(viewDate);
+  ovShow(`<div class="t" style="text-align:center;font-size:17px;margin-bottom:12px">الملف جاهز ✅</div><button onclick="sharePdf()">📤 مشاركة (واتساب)</button><div style="height:8px"></div><button class="g" onclick="dlPdf()">⬇ حفظ في الملفات</button><div style="height:8px"></div><button class="g" onclick="ovClose()">إغلاق</button>`)}
+ catch(e){ovShow(`<div class="t bad" style="margin-bottom:8px">تعذّر تجهيز ملف PDF</div><div class="v" style="margin-bottom:12px">تأكد من الاتصال بالإنترنت وحاول مرة أخرى، أو أرسل التقرير نصًّا.</div><button class="g" onclick="ovClose();waShare()">📤 إرسال نصي للواتساب</button><div style="height:8px"></div><button class="g" onclick="ovClose()">إغلاق</button>`)}}
+async function sharePdf(){try{if(navigator.canShare&&navigator.canShare({files:[pdfFile]}))await navigator.share({files:[pdfFile],title:"تقرير تثبيت القرآن"});else dlPdf()}catch(e){if(e.name!=="AbortError")dlPdf()}}
+function dlPdf(){const a=document.createElement("a");a.href=URL.createObjectURL(pdfFile);a.download=pdfFile.name;document.body.appendChild(a);a.click();a.remove()}
 function waText(){
  const ds=viewDate,i=dayIdx(new Date(ds+"T00:00:00"));
  const all=[...new Set([...students,...reports.map(r=>r.name)])].sort((a,b)=>a.localeCompare(b,"ar"));
