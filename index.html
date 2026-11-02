@@ -83,10 +83,39 @@ tr:nth-child(even) td:has(>.nm){background:var(--stripe)}
 .sa{display:flex;margin-top:10px}.sa button{font-size:12px;padding:6px 12px;opacity:.9}.pc{color:var(--pr);font-size:17px}
 .mt{color:var(--mu);font-size:12px;margin-top:8px}.mt b{color:var(--tx)}.ms{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.55);display:grid;place-items:center;padding:20px;z-index:99}
+.hd.mini{padding:calc(env(safe-area-inset-top) + 10px) 16px 20px;border-radius:0 0 50% 50%/0 0 18px 18px}
+.hd.mini .bsm,.hd.mini .tg{display:none}.hd.mini h1{font-size:23px;margin:0}.hd.mini .sub{margin-top:2px;font-size:12px}
+.lg{background:var(--card);border:1px solid var(--bd);border-radius:24px;padding:26px 20px 20px;text-align:center}
+.lt{font-family:"Reem Kufi","IBM Plex Sans Arabic",sans-serif;font-size:23px;color:var(--pr);font-weight:700}.ls{color:var(--mu);margin:2px 0 16px}
+input.big{font-size:19px;padding:16px;text-align:center;border-radius:16px;margin-bottom:6px}
+.cta{padding:16px;font-size:17px;border-radius:16px;font-weight:700}.cta:disabled{background:var(--pr2);color:var(--mu);opacity:1}
+.cap{color:var(--mu);font-size:12.5px;margin-top:12px}
+.gr{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.av{width:46px;height:46px;border-radius:50%;background:linear-gradient(145deg,var(--gold),#8c6a1f);color:#fff;font-family:"Reem Kufi",sans-serif;font-size:22px;display:grid;place-items:center;flex:none}
+.gi{flex:1;min-width:0}.gi b{display:block;font-size:16px;overflow-wrap:anywhere}.gi small{color:var(--mu)}
+.lnk{width:auto;background:none;color:var(--mu);padding:6px 8px;font-size:12px;text-decoration:underline;font-weight:400}
+.nt{background:var(--gold2);border-radius:12px;padding:8px 12px;font-size:13px;margin-bottom:14px}
+.wd{background:var(--card);border:1.5px solid var(--bd);border-radius:22px;padding:16px;margin-bottom:12px;transition:border-color .2s,background .2s}
+.wd.d-ok{border-color:var(--ok);background:var(--okbg)}.wd.d-no{border-color:var(--bad);background:var(--badbg)}
+.wh{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.wn{width:30px;height:30px;border-radius:50%;background:var(--pr2);color:var(--pr);font-weight:700;display:grid;place-items:center;flex:none;font-size:14px}
+.d-ok .wn{background:var(--btn);color:#fff}.d-no .wn{background:var(--bad);color:#fff}
+.wt{font-family:"Reem Kufi","IBM Plex Sans Arabic",sans-serif;font-size:18px;font-weight:700;color:var(--pr)}
+.wv{font-size:19px;font-weight:500;line-height:1.9;margin:0 0 14px;padding-right:12px;border-right:3px solid var(--gold)}
+.ab{padding:15px 10px;font-size:16px;border-radius:16px;width:100%;background:var(--pr2);color:var(--pr);border:2px solid transparent;transition:transform .08s,background .15s}
+.d-ok .ab,.d-no .ab{background:var(--card)}.ab:active{transform:scale(.97)}
+.ab.y.on{background:var(--btn);color:#fff;border-color:var(--gold)}.ab.n.on{background:var(--bad);color:#fff}.ab.o.on{background:var(--gold);color:#fff}
+.a2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.wd>.a2:first-of-type{margin-top:0}
+.nums{display:flex;gap:8px;margin-top:8px}.nb{flex:1;width:auto;padding:12px 0;background:var(--card);color:var(--pr);font-weight:700}.nb.on{background:var(--gold);color:#fff}
+.bb{position:sticky;bottom:0;margin:6px -16px 0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--bg) 78%,transparent)}
+.bt{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--mu);margin-bottom:8px}.bt .bar{flex:1}.lt2{font-size:13px;text-align:center;margin-bottom:6px}
+.sx{text-align:center;padding:30px 16px 20px}.st2{font-family:"Reem Kufi",sans-serif;font-size:24px;color:var(--pr);margin:6px 0 2px;font-weight:700}.bl{margin:10px 0 14px}
+.sm{margin:4px 0 16px;border-top:1px solid var(--bd)}.sr{display:flex;justify-content:space-between;align-items:center;padding:10px 4px;border-bottom:1px solid var(--bd);font-size:14px}
+@media (prefers-reduced-motion:no-preference){.hit,.lg{animation:rise .35s ease-out}@keyframes rise{from{transform:scale(.97);opacity:.5}to{transform:scale(1);opacity:1}}}
 .po{display:none}.dh{font-family:"Reem Kufi",sans-serif;font-weight:700;margin:16px 0 4px;color:var(--pr)}label{font-size:13px;color:var(--mu)}
 @media (prefers-reduced-motion:no-preference){.seal{animation:pop .45s ease-out}@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}}
 @media print{.pt{display:block!important}.sv{display:none!important}:root{--bg:#fff;--card:#fff;--tx:#10231F;--mu:#4a5d57;--pr:#0E5C4E;--btn:#0E5C4E;--pr2:#E2EEE9;--bd:#cdd9d4;--gold:#B8923A;--gold2:#F6EEDA;--bad:#A8432F;--badbg:#F8E5E0;--ok:#0E5C4E;--okbg:#DAEEE6;--warn:#85570A;--warnbg:#F8EAC6;--hd1:#08332D;--hd2:#0E5C4E;--stripe:#F3F8F6}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}.noprint{display:none!important}.po{display:block;text-align:center;font-weight:700;font-size:18px;margin-bottom:10px}.card{border:0;padding:0}.card.frame{border:2px solid var(--gold);padding:12px}body{background:#fff}.w{max-width:none;padding:0}.sc{overflow:visible}.nmh,td:has(>.nm){position:static;box-shadow:none}}
-</style></head><body><header class="hd noprint"><div class="bsm">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div><h1>تثبيت القرآن</h1><div class="tg">استعدادًا لشهر رمضان المبارك</div><div class="sub"><span id="today"></span> &nbsp;•&nbsp; <span id="hj"></span></div></header>
+</style></head><body><header id="hd" class="hd noprint"><div class="bsm">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div><h1>تثبيت القرآن</h1><div class="tg">استعدادًا لشهر رمضان المبارك</div><div class="sub"><span id="today"></span> &nbsp;•&nbsp; <span id="hj"></span></div></header>
 <div class="w">
 <div id="app"><div class="msg">جارٍ التحميل…</div></div></div>
 <script>
@@ -130,38 +159,47 @@ async function init(){
  render()}
 function render(){
  const act=document.activeElement&&document.activeElement.id;
+ $("hd").classList.toggle("mini",!(page==="student"&&!me));
  app.innerHTML=page==="student"?studentView():page==="login"?loginView():adminView();
  if(act&&$(act)&&$(act).tagName==="INPUT"&&$(act).type==="text"){const e=$(act);e.focus();try{e.setSelectionRange(e.value.length,e.value.length)}catch(x){}}}
 // ---------- student
 function studentView(){
  const foot=`<div class="lk"><a onclick="goAdmin()">دخول المشرف</a></div>`;
  if(!me){const v=($("nm")&&$("nm").value)||"";
-  return `<div class="card"><div class="t">السلام عليكم ورحمة الله</div><div class="v" style="margin-bottom:10px">اكتب اسمك للدخول</div><div class="note">⚠ تنبيه: اكتب اسمك بنفس الطريقة في كل مرة (نفس الحروف والترتيب)، لأن تقريرك وإحصائياتك مرتبطة بالاسم.</div>
-  <input id="nm" type="text" value="${esc(v)}" placeholder="الاسم" oninput="sugg()" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+  return `<div class="lg pop"><div class="lt">السلام عليكم ورحمة الله</div><div class="ls">اكتب اسمك للبدء</div>
+  <input id="nm" class="big" type="text" value="${esc(v)}" placeholder="اسمك الكامل" oninput="sugg()" onkeydown="if(event.key==='Enter')login(this.value)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go">
   <div class="sug" id="sg">${sugHtml(v)}</div>
-  <button onclick="login($('nm').value)">دخول</button></div>${foot}`}
- const head=`<div class="card" style="display:flex;justify-content:space-between;align-items:center"><div><div class="v">الطالب</div><div class="t">${esc(me)}</div></div><button class="s g" onclick="logout()">تغيير</button></div>`;
- if(TD<START)return head+`<div class="card msg"><div style="font-size:42px">🌙</div><div class="t">يبدأ البرنامج بإذن الله</div><div>${fmt(START)}</div></div>`+foot;
+  <button class="cta" onclick="login($('nm').value)">ابدأ</button>
+  <div class="cap">اكتب اسمك بنفس الطريقة في كل مرة ليبقى سجلّك محفوظًا</div></div>${foot}`}
  const i=dayIdx(today),id=TD+"_"+me;
- if(localStorage.getItem("tn_s_"+id)&&!editing)return head.replace("","")+successView()+foot;
+ const head=`<div class="gr"><div class="av">${esc([...me][0]||"")}</div><div class="gi"><b>مرحبًا ${esc(me)}</b><small>ورد يوم ${DAYS[i]}</small></div><button class="lnk" onclick="logout()">ليس أنت؟</button></div>`;
+ if(TD<START)return head+`<div class="card msg pop"><div style="font-size:42px">🌙</div><div class="t">يبدأ البرنامج بإذن الله</div><div>${fmt(START)}</div></div>`+foot;
+ if(localStorage.getItem("tn_s_"+id)&&!editing)return successView(i)+foot;
  if(draft.id!==id){let o={};try{o=JSON.parse(localStorage.getItem("tn_d_"+id)||"{}")}catch(e){}draft={id,v:o}}
- const its=items(i),ans=its.filter(x=>draft.v[x[0]]!=null).length;let h=head+`<div class="card"><div class="v" style="margin-bottom:6px">أجبت عن ${ans} من ${its.length}</div><div class="bar pg" style="margin-bottom:8px"><i style="width:${ans/its.length*100}%"></i></div>`;
- items(i).forEach(it=>{const [k,l,v,mx]=it,cur=draft.v[k];
-  h+=`<div class="it"><div class="t">${l}</div><div class="val">${esc(v)}</div><div class="v" style="margin-top:6px">${mx?"هل أتممته غيبًا؟":"هل قرأته؟"}</div><div class="row">`;
+ const its=items(i),ans=its.filter(x=>draft.v[x[0]]!=null).length,all=ans===its.length;
+ let h=head+`<div class="nt">⏰ سجّل ورد اليوم قبل الساعة 10 مساءً</div>`;
+ its.forEach((it,n)=>{const [k,l,v,mx]=it,cur=draft.v[k];
+  const st=cur==null?"":okv(k,i,cur)?"d-ok":"d-no";
+  h+=`<div class="wd ${st}${lastK===k?" hit":""}" id="it_${k}"><div class="wh"><span class="wn">${st==="d-ok"?"✓":n+1}</span><span class="wt">${l}</span></div><div class="wv">${esc(v)}</div>`;
   if(mx){const oth=(cur>0&&cur<mx)||ex[k];
-   h+=`<button class="${cur===mx?"on":""}" onclick="setv('${k}',${mx})">نعم ${mx} مرات ✔</button><button class="${cur===0?"on no":""}" onclick="setv('${k}',0)">لا</button><button class="${oth&&cur!==0&&cur!==mx?"on":""}" onclick="more('${k}')">عدد آخر</button>`;
-   if(oth){h+=`</div><div class="row">`;for(let n=1;n<mx;n++)h+=`<button class="${cur===n?"on":""}" onclick="setv('${k}',${n})">${n}</button>`}}
-  else h+=`<button class="${cur===1?"on":""}" onclick="setv('${k}',1)">نعم</button><button class="${cur===0?"on no":""}" onclick="setv('${k}',0)">لا</button>`;
-  h+=`</div></div>`});
+   h+=`<button class="ab y${cur===mx?" on":""}" onclick="setv('${k}',${mx})">✔ أتممتها ${mx} مرات</button><div class="a2"><button class="ab n${cur===0?" on":""}" onclick="setv('${k}',0)">لم أقرأها</button><button class="ab o${oth&&cur!==0&&cur!==mx?" on":""}" onclick="more('${k}')">عدد آخر</button></div>`;
+   if(oth){h+=`<div class="nums">`;for(let q=1;q<mx;q++)h+=`<button class="nb${cur===q?" on":""}" onclick="setv('${k}',${q})">${q}</button>`;h+=`</div>`}}
+  else h+=`<div class="a2"><button class="ab y${cur===1?" on":""}" onclick="setv('${k}',1)">✔ نعم قرأته</button><button class="ab n${cur===0?" on":""}" onclick="setv('${k}',0)">لم أقرأه</button></div>`;
+  h+=`</div>`});
+ lastK="";
  const late=new Date().getHours()>=22;
- h+=`</div><div class="note">⚠ تنبيه: سجّل ورد <b>اليوم</b> فقط، ولا يمكن إدخال ورد يوم مضى. موعد الإرسال قبل الساعة 10 مساءً، ومن لم يسجّل يُحسب «لم يقرأ ورده».</div>${late?'<div class="card bad">تنبيه: تجاوزت الساعة 10 مساءً (موعد إرسال التقرير)</div>':''}<button onclick="save()" ${busy?"disabled":""}>${busy?"جارٍ الإرسال…":"إرسال التقرير"}</button>${foot}`;
+ h+=`<div class="bb">${late?'<div class="bad lt2">تجاوزت الساعة 10 مساءً (موعد الإرسال)</div>':''}<div class="bt"><span>أجبت عن ${ans} من ${its.length}</span><div class="bar pg"><i style="width:${ans/its.length*100}%"></i></div></div><button class="cta" ${!all||busy?"disabled":""} onclick="save()">${busy?"جارٍ الإرسال…":all?"إرسال التقرير ✓":"أجب عن كل الأوراد"}</button></div>${foot}`;
  return h}
 function sugHtml(raw){const v=norm(raw),all=[...new Set([...known(),...names])];return (v?all.filter(n=>n.startsWith(v)&&n!==v).slice(0,6):[]).map(n=>`<button data-n="${esc(n)}" onclick="login(this.dataset.n)">${esc(n)}</button>`).join("")}
 function sugg(){$("sg").innerHTML=sugHtml($("nm").value)}
 function streak(){let n=0;for(let d=new Date(today);;d.setDate(d.getDate()-1)){const ds=iso(d);if(ds<START)break;let v=null;try{v=JSON.parse(localStorage.getItem("tn_d_"+ds+"_"+me)||"null")}catch(e){}if(!v)break;const i=dayIdx(d);if(!items(i).every(it=>okv(it[0],i,v[it[0]])))break;n++}return n}
 function streakMsg(){const n=streak();if(n>=2)return `<div class="streak">🌟 أتممت أوراد ${n} أيام متتالية، بارك الله فيك وواصل</div>`;if(n===1)return `<div class="streak">🌱 بداية طيبة، واصل غدًا بإذن الله</div>`;return ""}
-function successView(){return `<div class="card" style="text-align:center;padding:32px 16px"><div class="seal">✓</div><div class="t" style="font-size:20px;margin:8px 0">تم إرسال تقريرك بنجاح</div><div class="v" style="margin-bottom:6px">${esc(me)}</div><div class="v" style="margin-bottom:14px">بارك الله فيك وجعله في ميزان حسناتك 🌙</div>${streakMsg()}<button class="g" onclick="editing=true;render()">↩ الرجوع وتعديل التقرير</button></div>`}
-function setv(k,n){draft.v[k]=n;const mx=maxOf(k,dayIdx(today));if(n===0||n===mx)delete ex[k];render()}
+function successView(i){
+ let v={};try{v=JSON.parse(localStorage.getItem("tn_d_"+TD+"_"+me)||"{}")}catch(e){}
+ return `<div class="card sx hit"><div class="seal">✓</div><div class="st2">تم إرسال تقريرك</div><div class="v">${esc(me)} — ${DAYS[i]}</div><div class="bl">بارك الله فيك وجعله في ميزان حسناتك 🌙</div>${streakMsg()}<div class="sm">${items(i).map(it=>`<div class="sr"><span>${it[1]}</span>${v[it[0]]==null?"":pl(it[0],i,v[it[0]])}</div>`).join("")}</div><button class="g" onclick="editing=true;render()">↩ تعديل إجاباتي</button></div>`}
+let lastK="";
+function setv(k,n){const i=dayIdx(today),first=items(i).find(it=>draft.v[it[0]]==null);draft.v[k]=n;lastK=k;if(n===0||n===maxOf(k,i))delete ex[k];render();
+ if(first&&first[0]===k){const nx=items(i).find(it=>draft.v[it[0]]==null);if(nx)setTimeout(()=>{const e=$("it_"+nx[0]);if(e)e.scrollIntoView({behavior:"smooth",block:"center"})},200)}}
 function more(k){ex[k]=1;render()}
 function login(n){n=norm(n);if(n.length<2){alert("اكتب اسمك");return}if(![...known(),...names].includes(n)&&!confirm("«"+n+"» اسم جديد لم يُسجَّل من قبل.\n\nهل هو اسمك الصحيح؟ تذكّر أن تستعمل نفس الاسم دائمًا."))return;me=n;localStorage.setItem("tn_me",n);const a=known();if(!a.includes(n)){a.push(n);localStorage.setItem("tn_names",JSON.stringify(a))}editing=false;render()}
 function logout(){if(!confirm("تنبيه: يجب أن تستعمل نفس الاسم دائمًا. تغيير الاسم ينشئ سجلًّا جديدًا منفصلًا.\n\nهل تريد تغيير الاسم؟"))return;me="";localStorage.removeItem("tn_me");draft={};editing=false;render()}
