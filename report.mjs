@@ -1,11 +1,31 @@
 // تقرير تثبيت القرآن: يومي (PDF) + أسبوعي (PDF) + تذكير مسائي (رسالة) — يُرسَل إلى تيليجرام
 import fs from "node:fs";
 
-const URL_ = "https://syuawkhtnikqoqsjdese.supabase.co";
+const URL_ = process.env.SB_URL || "https://syuawkhtnikqoqsjdese.supabase.co";
+const TG_API = process.env.TG_API || "https://api.telegram.org";
 const KEY = "sb_publishable_XENRfQEvxfWgNcGzd6unPA_JaXNOACt";
-const { ADMIN_EMAIL, ADMIN_PASSWORD, TG_TOKEN, TG_CHAT, REPORT_DATE, DRY_RUN, HTML_ONLY, SCHEDULE } = process.env;
-const MODE = (process.env.MODE || "").trim() ||
-  ({ "0 23 * * *": "daily", "5 23 * * 5": "weekly", "0 20 * * *": "reminder" }[SCHEDULE] || "daily");
+const { ADMIN_EMAIL, ADMIN_PASSWORD, TG_TOKEN, TG_CHAT, JOIN_CODE, REPORT_DATE, DRY_RUN, HTML_ONLY, SCHEDULE } = process.env;
+// نوع التقرير يُستنتج من موعد الجدولة (عدة مواعيد متقاربة لكل نوع، والتكرار تمنعه علامة الإرسال)
+function modeFor(c) {
+  if (!c) return "daily";
+  const f = c.trim().split(/\s+/);
+  if (f[4] === "5" || f[4] === "6") return "weekly";
+  if (f[1] === "20") return "reminder";
+  return "daily";
+}
+const MODE = (process.env.MODE || "").trim() || modeFor(SCHEDULE);
+
+// التقرير اليومي/الأسبوعي يُنشأ عند 23:57 بتوقيت الجزائر (= 22:57 UTC) ليُسمح للمتأخرين بالتسجيل في نفس اليوم.
+// المواعيد المبكرة تنتظر حتى هذا الوقت (فتتحمل تأخر GitHub)، والمواعيد التي بعد منتصف الليل احتياطية وترسل فورًا.
+const WAKE = { "37 21 * * *": 0, "7 22 * * *": 20, "37 22 * * *": 40, "42 21 * * 5": 60, "12 22 * * 5": 80, "42 22 * * 5": 100 };
+export function waitMs(nowMs, schedule) {
+  const off = WAKE[(schedule || "").trim()];
+  if (off === undefined) return 0;
+  const n = new Date(nowMs);
+  const target = Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate(), 22, 57, 0) + off * 1000;
+  const ms = target - nowMs;
+  return ms > 0 && ms < 2 * 3600e3 ? ms : 0;
+}
 
 const DAYS = ["السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
 const KEYS = ["t", "q", "l", "k"];
@@ -37,6 +57,32 @@ async function api(path, token) {
   return r.json();
 }
 
+let TOKEN = null;
+async function getToken() {
+  if (TOKEN) return TOKEN;
+  const login = await fetch(URL_ + "/auth/v1/token?grant_type=password", {
+    method: "POST", headers: { apikey: KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD }) });
+  if (!login.ok) throw new Error("فشل تسجيل الدخول إلى Supabase: " + login.status);
+  TOKEN = (await login.json()).access_token;
+  return TOKEN;
+}
+// علامة الإرسال: أول تشغيل يرسل، وبقية المواعيد المتقاربة تتخطى (التشغيل اليدوي يرسل دائمًا)
+const FORCE = process.env.GITHUB_EVENT_NAME === "workflow_dispatch" || !!REPORT_DATE;
+async function setMarker(key, value, token) {
+  const r = await fetch(URL_ + "/rest/v1/settings?on_conflict=key", { method: "POST",
+    headers: { apikey: KEY, Authorization: "Bearer " + token, "Content-Type": "application/json", Prefer: "resolution=merge-duplicates" },
+    body: JSON.stringify([{ key, value }]) });
+  if (!r.ok) console.log("تنبيه: تعذّر حفظ علامة الإرسال", r.status);
+}
+async function once(key, value, fn) {
+  if (DRY_RUN || HTML_ONLY || FORCE) return fn();
+  const token = await getToken();
+  const cur = await api(`/rest/v1/settings?key=eq.${key}&select=value`, token);
+  if (cur[0] && cur[0].value === value) { console.log("أُرسل مسبقًا، تخطّي:", key, value); return; }
+  await setMarker(key, value, token);
+  try { await fn(); } catch (e) { await setMarker(key, cur[0] ? cur[0].value : "", token); throw e; }
+}
 async function loadData(start, end) {
   if (DRY_RUN) {
     const SCHED = DEF.map((x, i) => ({ ...x, l: i === 6 ? "" : "من سورة الفاتحة", k: "سورة يس" }));
@@ -52,11 +98,7 @@ async function loadData(start, end) {
     }
     return { START: "2026-10-31", SCHED, students, reports };
   }
-  const login = await fetch(URL_ + "/auth/v1/token?grant_type=password", {
-    method: "POST", headers: { apikey: KEY, "Content-Type": "application/json" },
-    body: JSON.stringify({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD }) });
-  if (!login.ok) throw new Error("فشل تسجيل الدخول إلى Supabase: " + login.status);
-  const token = (await login.json()).access_token;
+  const token = await getToken();
   const [students, reports, settings] = await Promise.all([
     api("/rest/v1/students?select=name&limit=5000", token),
     api(`/rest/v1/reports?select=*&report_date=gte.${start}&report_date=lte.${end}&limit=10000`, token),
@@ -73,24 +115,24 @@ const STYLE = `<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@4
 @page{size:A4;margin:12mm}
 :root{--pr:#0E5C4E;--gold:#B8923A;--gold2:#F6EEDA;--bd:#D5E1DC;--stripe:#F3F8F6;--mu:#5A6F68;--ok:#0E5C4E;--okbg:#DAEEE6;--bad:#A8432F;--badbg:#F8E5E0;--warn:#85570A;--warnbg:#F8EAC6}
 *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-body{margin:0;font-family:"IBM Plex Sans Arabic","Noto Sans Arabic",Tahoma,sans-serif;color:#10231F;font-size:12px}
+body{margin:0;font-family:"IBM Plex Sans Arabic","Noto Sans Arabic",Tahoma,sans-serif;color:#10231F;font-size:15px}
 .hd{background:linear-gradient(165deg,#08332D,#0E5C4E);color:#F6EFD8;text-align:center;padding:16px 12px 18px;border-radius:18px;margin-bottom:12px;border-bottom:4px solid var(--gold)}
 .bsm{font-family:Amiri,serif;color:#E6CC85;font-size:16px}.hd h1{font-family:"Reem Kufi",sans-serif;font-size:28px;margin:2px 0;color:#fff}
-.hd .sub{color:#E6CC85;font-size:12px}
-.sum{display:flex;gap:8px;margin-bottom:12px}.sum div{flex:1;border-radius:12px;padding:8px;text-align:center;font-weight:700}
-.sum small{display:block;font-weight:500;font-size:11px}
+.hd .sub{color:#E6CC85;font-size:14px}
+.sum{display:flex;gap:8px;margin-bottom:12px}.sum div{flex:1;border-radius:12px;padding:10px 8px;text-align:center;font-weight:700;font-size:21px}
+.sum small{display:block;font-weight:500;font-size:13px}
 table{border-collapse:separate;border-spacing:0;width:100%;border:1px solid var(--bd);border-radius:12px;overflow:hidden}
 thead{display:table-header-group}tr{break-inside:avoid}
-th{background:linear-gradient(180deg,#0E5C4E,#08332D);color:#F6EFD8;font-family:"Reem Kufi",sans-serif;font-weight:500;padding:9px 8px;text-align:right;border-bottom:3px solid var(--gold)}
-td{padding:7px 8px;border-bottom:1px solid var(--bd);text-align:right}tr:nth-child(even) td{background:var(--stripe)}
-.num{color:var(--mu);width:28px}.nm{font-weight:500}
-.pill,.chip{display:inline-block;border-radius:99px;font-weight:700;padding:1px 10px}.pill{min-width:34px;text-align:center}
+th{background:linear-gradient(180deg,#0E5C4E,#08332D);color:#F6EFD8;font-family:"Reem Kufi",sans-serif;font-weight:500;font-size:15px;padding:11px 8px;text-align:right;border-bottom:3px solid var(--gold)}
+td{padding:9px 8px;font-size:15px;border-bottom:1px solid var(--bd);text-align:right}tr:nth-child(even) td{background:var(--stripe)}
+.num{color:var(--mu);width:34px}.nm{font-weight:500}
+.pill,.chip{display:inline-block;border-radius:99px;font-weight:700;font-size:14px;padding:2px 11px}.pill{min-width:34px;text-align:center}
 .ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
 .ok .pill,.ok .chip{background:var(--okbg)}.bad .pill,.bad .chip{background:var(--badbg)}.warn .chip{background:var(--warnbg)}
 .ft{text-align:center;font-family:Amiri,serif;color:var(--gold);font-size:16px;margin-top:12px}
 .hon{display:flex;gap:10px;margin-bottom:14px}.hon .c{flex:1;border:1.5px solid var(--gold);background:var(--gold2);border-radius:16px;padding:10px 6px;text-align:center}
 .hon .m{width:34px;height:34px;border-radius:50%;margin:0 auto 4px;color:#fff;font-weight:700;font-size:17px;line-height:34px;font-family:"Reem Kufi",sans-serif}
-.hon .n{font-weight:700;font-size:13px}.hon .p{color:var(--pr);font-weight:700;font-size:18px}
+.hon .n{font-weight:700;font-size:15px}.hon .p{color:var(--pr);font-weight:700;font-size:21px}
 .bar{height:7px;background:#E2EEE9;border-radius:6px;overflow:hidden;min-width:70px}.bar i{display:block;height:100%;background:#0E5C4E}
 </style>`;
 const HEAD = (title, sub) => `<div class="hd"><div class="bsm">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div><h1>${title}</h1><div class="sub">${sub}</div></div>`;
@@ -145,8 +187,28 @@ function buildWeekly(start, end, data) {
     `<table><thead><tr><th>#</th><th>الطالب</th><th>أيام الإرسال</th><th>الإنجاز</th><th>التأخر</th><th>أيام لم يقرأ فيها ورده</th></tr></thead><tbody>${body}</tbody></table>`);
 }
 
+const IDS = (TG_CHAT || "").split(",").map((x) => x.trim()).filter(Boolean);
+async function rest(method, path, body) {
+  const r = await fetch(URL_ + path, { method, headers: { apikey: KEY, Authorization: "Bearer " + (await getToken()), "Content-Type": "application/json", Prefer: "resolution=merge-duplicates" }, body: body ? JSON.stringify(body) : undefined });
+  if (!r.ok) throw new Error(method + " " + path + " → " + r.status + " " + (await r.text()));
+}
+// المستلمون = المشرفون (TG_CHAT) + من انضموا عبر رابط البوت
+async function recipients() {
+  const ids = new Set(IDS);
+  if (!DRY_RUN && !HTML_ONLY) {
+    try { (await api("/rest/v1/subscribers?select=chat_id&limit=1000", await getToken())).forEach((s) => ids.add(String(s.chat_id))); }
+    catch (e) { console.log("تنبيه: تعذّر قراءة المشتركين:", e.message); }
+  }
+  return [...ids];
+}
+async function toAll(send) {
+  let ok = 0; const errs = [];
+  for (const id of await recipients()) { try { await send(id); ok++; } catch (e) { errs.push(id + ": " + e.message); } }
+  if (errs.length) console.log("تنبيه: تعذّر الإرسال إلى:", errs.join(" | "));
+  if (!ok) throw new Error("لم يصل التقرير إلى أي مستلم");
+}
 async function tg(method, body) {
-  const res = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/${method}`, body instanceof FormData ? { method: "POST", body }
+  const res = await fetch(`${TG_API}/bot${TG_TOKEN}/${method}`, body instanceof FormData ? { method: "POST", body }
     : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
   const out = await res.json();
   if (!out.ok) throw new Error("فشل إرسال تيليجرام: " + JSON.stringify(out));
@@ -162,33 +224,73 @@ async function sendPdf(html, filename, caption) {
   const pdf = await page.pdf({ format: "A4", printBackground: true, preferCSSPageSize: true });
   await browser.close();
   if (DRY_RUN) { fs.writeFileSync("report.pdf", pdf); console.log("report.pdf"); return; }
-  const form = new FormData();
-  form.append("chat_id", TG_CHAT); form.append("caption", caption);
-  form.append("document", new Blob([pdf], { type: "application/pdf" }), filename);
-  await tg("sendDocument", form);
+  await toAll(async (id) => {
+    const form = new FormData();
+    form.append("chat_id", id); form.append("caption", caption);
+    form.append("document", new Blob([pdf], { type: "application/pdf" }), filename);
+    await tg("sendDocument", form);
+  });
   console.log("تم الإرسال ✅", filename);
 }
 
+// تسجيل المنضمين: من يفتح رابط البوت (start=الرمز السري) ويضغط Start يُضاف تلقائيًا
+async function syncSubscribers() {
+  const st = await api("/rest/v1/bot_state?key=eq.tg_offset&select=value", await getToken());
+  let offset = st[0] ? +st[0].value : 0;
+  const res = await (await fetch(`${TG_API}/bot${TG_TOKEN}/getUpdates?offset=${offset}&timeout=0&allowed_updates=${encodeURIComponent('["message"]')}`)).json();
+  if (!res.ok) throw new Error("getUpdates: " + JSON.stringify(res));
+  const say = (chat_id, text) => tg("sendMessage", { chat_id, text }).catch((e) => console.log("تعذّر الرد:", e.message));
+  for (const u of res.result) {
+    offset = Math.max(offset, u.update_id + 1);
+    const m = u.message;
+    if (!m || !m.chat || m.chat.type !== "private" || !m.text) continue;
+    const [c0, code] = m.text.trim().split(/\s+/), cmd = c0.split("@")[0].toLowerCase();
+    const id = String(m.chat.id), name = [m.from?.first_name, m.from?.last_name].filter(Boolean).join(" ");
+    if (cmd === "/start") {
+      if (JOIN_CODE && code === JOIN_CODE) {
+        await rest("POST", "/rest/v1/subscribers?on_conflict=chat_id", [{ chat_id: id, name }]);
+        await say(id, "✅ تم تسجيلك في تقارير تثبيت القرآن.\nستصلك التقارير اليومية والأسبوعية هنا بإذن الله.\nلإيقافها أرسل /stop");
+        for (const a of IDS) if (a !== id) await say(a, `👤 انضم مشترك جديد: ${name || id}`);
+      } else if (IDS.includes(id)) await say(id, "✅ أنت مسجّل كمشرف وتصلك التقارير.");
+      else await say(id, "هذا البوت خاص. اطلب من المشرف رابط الانضمام.");
+    } else if (cmd === "/stop") {
+      await rest("DELETE", `/rest/v1/subscribers?chat_id=eq.${id}`);
+      await say(id, "تم إلغاء اشتراكك. يمكنك العودة من رابط الانضمام متى شئت.");
+    }
+  }
+  await rest("POST", "/rest/v1/bot_state?on_conflict=key", [{ key: "tg_offset", value: String(offset) }]);
+  console.log("تمت المزامنة، تحديثات:", res.result.length);
+}
+if (MODE === "sync") { await syncSubscribers(); process.exit(0); }
+
+const wait = process.env.GITHUB_EVENT_NAME === "workflow_dispatch" || REPORT_DATE ? 0 : waitMs(Date.now(), SCHEDULE);
+if (wait) { console.log("انتظار حتى 23:57 بتوقيت الجزائر:", Math.round(wait / 60000), "دقيقة"); await new Promise((res) => setTimeout(res, wait)); }
 const ds = reportDate();
 if (MODE === "weekly") {
-  const start = addDays(ds, -6), data = await loadData(start, ds);
-  if (ds < data.START) { console.log("قبل بداية البرنامج"); process.exit(0); }
-  const { rows } = weeklyStats(start, ds, data);
-  const top = rows.filter((r) => r.pct > 0).slice(0, 3).map((r, j) => ["🥇", "🥈", "🥉"][j] + " " + r.n + " " + r.pct + "%").join("\n");
-  await sendPdf(buildWeekly(start, ds, data), `tathbeet-week-${ds}.pdf`, `📊 التقرير الأسبوعي لتثبيت القرآن\n${start} → ${ds}${top ? "\n\n" + top : ""}`);
+  await once("sent_weekly", ds, async () => {
+    const start = addDays(ds, -6), data = await loadData(start, ds);
+    if (ds < data.START) { console.log("قبل بداية البرنامج"); return; }
+    const { rows } = weeklyStats(start, ds, data);
+    const top = rows.filter((r) => r.pct > 0).slice(0, 3).map((r, j) => ["🥇", "🥈", "🥉"][j] + " " + r.n + " " + r.pct + "%").join("\n");
+    await sendPdf(buildWeekly(start, ds, data), `tathbeet-week-${ds}.pdf`, `📊 التقرير الأسبوعي لتثبيت القرآن\n${start} → ${ds}${top ? "\n\n" + top : ""}`);
+  });
 } else if (MODE === "reminder") {
-  const data = await loadData(ds, ds);
-  if (ds < data.START) { console.log("قبل بداية البرنامج"); process.exit(0); }
-  const names = [...new Set([...data.students, ...data.reports.map((r) => r.name)])].sort((a, b) => a.localeCompare(b, "ar"));
-  const sent = new Set(data.reports.map((r) => r.name));
-  const miss = names.filter((n) => !sent.has(n));
-  const text = miss.length
-    ? `⏰ تذكير تثبيت القرآن\nلم يرسل أوراد اليوم بعد (${miss.length} من ${names.length}):\n\n${miss.map((n, j) => `${j + 1}. ${n}`).join("\n")}\n\nالموعد الأخير: قبل الساعة 10 مساءً.`
-    : `✅ جميع الطلاب (${names.length}) أرسلوا أوراد اليوم، بارك الله فيهم.`;
-  if (DRY_RUN || HTML_ONLY) console.log(text); else { await tg("sendMessage", { chat_id: TG_CHAT, text }); console.log("تم إرسال التذكير ✅"); }
+  await once("sent_reminder", ds, async () => {
+    const data = await loadData(ds, ds);
+    if (ds < data.START) { console.log("قبل بداية البرنامج"); return; }
+    const names = [...new Set([...data.students, ...data.reports.map((r) => r.name)])].sort((a, b) => a.localeCompare(b, "ar"));
+    const sent = new Set(data.reports.map((r) => r.name));
+    const miss = names.filter((n) => !sent.has(n));
+    const text = miss.length
+      ? `⏰ تذكير تثبيت القرآن\nلم يرسل أوراد اليوم بعد (${miss.length} من ${names.length}):\n\n${miss.map((n, j) => `${j + 1}. ${n}`).join("\n")}\n\nالموعد الأخير: قبل الساعة 11:30 مساءً.`
+      : `✅ جميع الطلاب (${names.length}) أرسلوا أوراد اليوم، بارك الله فيهم.`;
+    if (DRY_RUN || HTML_ONLY) console.log(text); else { await toAll((id) => tg("sendMessage", { chat_id: id, text })); console.log("تم إرسال التذكير ✅"); }
+  });
 } else {
-  const data = await loadData(ds, ds);
-  if (ds < data.START) { console.log("قبل بداية البرنامج، لا إرسال:", ds, "<", data.START); process.exit(0); }
-  const names = new Set([...data.students, ...data.reports.map((r) => r.name)]);
-  await sendPdf(buildDaily(ds, data), `tathbeet-${ds}.pdf`, `📖 تقرير تثبيت القرآن\n${DAYS[dIdx(ds)]} ${ds}\n✅ ${data.reports.length} أرسلوا من ${names.size}`);
+  await once("sent_daily", ds, async () => {
+    const data = await loadData(ds, ds);
+    if (ds < data.START) { console.log("قبل بداية البرنامج، لا إرسال:", ds, "<", data.START); return; }
+    const names = new Set([...data.students, ...data.reports.map((r) => r.name)]);
+    await sendPdf(buildDaily(ds, data), `tathbeet-${ds}.pdf`, `📖 تقرير تثبيت القرآن\n${DAYS[dIdx(ds)]} ${ds}\n✅ ${data.reports.length} أرسلوا من ${names.size}`);
+  });
 }

@@ -143,11 +143,13 @@ const okv=(k,day,x)=>{if(x==null)return false;const m=maxOf(k,day);return m?x>=m
 const cell=(k,day,x)=>{const m=maxOf(k,day);return `<td class="${okv(k,day,x)?"ok":"bad"}"><span class="pill">${m?(x==null?0:x)+"/"+m:(x===1?"✓":"✕")}</span></td>`};
 const $=id=>document.getElementById(id),app=$("app");
 const today=new Date(),TD=iso(today);
+const EFF=today.getHours()<12?(()=>{const d=new Date(today);d.setDate(d.getDate()-1);return iso(d)})():TD;
+const lateNow=()=>{const n=new Date();return n.getHours()*60+n.getMinutes()>=1410};
 $("today").textContent=DAYS[dayIdx(today)]+" — "+today.toLocaleDateString("ar",{day:"numeric",month:"long",year:"numeric"});
 try{$("hj").textContent=today.toLocaleDateString("ar-SA-u-ca-islamic-umalqura",{day:"numeric",month:"long",year:"numeric"})}catch(e){}
 const fmt=ds=>new Date(ds+"T00:00:00").toLocaleDateString("ar",{weekday:"long",day:"numeric",month:"long"});
 let me=localStorage.getItem("tn_me")||"",names=[],page="student",draft={},editing=false,ex={},busy=false;
-let schedPage=false,wkStart="",reports=[],students=[],period="day",authed=false,loginErr="",detail="",viewDate=TD;
+let schedPage=false,wkStart="",reports=[],students=[],period="day",authed=false,loginErr="",detail="",viewDate=EFF;
 const known=()=>{try{return JSON.parse(localStorage.getItem("tn_names")||"[]")}catch(e){return[]}};
 async function loadSettings(){
  try{const {data}=await sb.from("settings").select("*");(data||[]).forEach(r=>{
@@ -178,7 +180,7 @@ function studentView(){
  if(localStorage.getItem("tn_s_"+id)&&!editing)return successView(i)+foot;
  if(draft.id!==id){let o={};try{o=JSON.parse(localStorage.getItem("tn_d_"+id)||"{}")}catch(e){}draft={id,v:o}}
  const its=items(i),ans=its.filter(x=>draft.v[x[0]]!=null).length,all=ans===its.length;
- let h=head+`<div class="nt">⏰ سجّل ورد اليوم قبل الساعة 10 مساءً</div>`;
+ let h=head+`<div class="nt">⏰ سجّل ورد اليوم قبل الساعة 11:30 مساءً</div>`;
  its.forEach((it,n)=>{const [k,l,v,mx]=it,cur=draft.v[k];
   const st=cur==null?"":okv(k,i,cur)?"d-ok":"d-no";
   h+=`<div class="wd ${st}${lastK===k?" hit":""}" id="it_${k}"><div class="wh"><span class="wn">${st==="d-ok"?"✓":n+1}</span><span class="wt">${l}</span></div><div class="wv">${esc(v)}</div>`;
@@ -188,8 +190,8 @@ function studentView(){
   else h+=`<div class="a2"><button class="ab y${cur===1?" on":""}" onclick="setv('${k}',1)">✔ نعم قرأته</button><button class="ab n${cur===0?" on":""}" onclick="setv('${k}',0)">لم أقرأه</button></div>`;
   h+=`</div>`});
  lastK="";
- const late=new Date().getHours()>=22;
- h+=`<div class="bb">${late?'<div class="bad lt2">تجاوزت الساعة 10 مساءً (موعد الإرسال)</div>':''}<div class="bt"><span>أجبت عن ${ans} من ${its.length}</span><div class="bar pg"><i style="width:${ans/its.length*100}%"></i></div></div><button class="cta" ${!all||busy?"disabled":""} onclick="save()">${busy?"جارٍ الإرسال…":all?"إرسال التقرير ✓":"أجب عن كل الأوراد"}</button></div>${foot}`;
+ const late=lateNow();
+ h+=`<div class="bb">${late?'<div class="bad lt2">تجاوزت الساعة 11:30 مساءً (موعد الإرسال)</div>':''}<div class="bt"><span>أجبت عن ${ans} من ${its.length}</span><div class="bar pg"><i style="width:${ans/its.length*100}%"></i></div></div><button class="cta" ${!all||busy?"disabled":""} onclick="save()">${busy?"جارٍ الإرسال…":all?"إرسال التقرير ✓":"أجب عن كل الأوراد"}</button></div>${foot}`;
  return h}
 function sugHtml(raw){const v=norm(raw),all=[...new Set([...known(),...names])];return (v?all.filter(n=>n.startsWith(v)&&n!==v).slice(0,6):[]).map(n=>`<button data-n="${esc(n)}" onclick="login(this.dataset.n)">${esc(n)}</button>`).join("")}
 function sugg(){$("sg").innerHTML=sugHtml($("nm").value)}
@@ -209,7 +211,7 @@ async function save(){
  if(iso(new Date())!==TD){alert("انتهى هذا اليوم، سيتم تحديث الصفحة لورد اليوم الجديد");location.reload();return}
  if(items(dayIdx(today)).some(it=>draft.v[it[0]]==null)){alert("أجب عن جميع الخانات أولًا");return}
  busy=true;render();
- const {error}=await sb.rpc("submit_report",{p_name:me,p_date:TD,p_day:dayIdx(today),p_v:draft.v,p_late:new Date().getHours()>=22});
+ const {error}=await sb.rpc("submit_report",{p_name:me,p_date:TD,p_day:dayIdx(today),p_v:draft.v,p_late:lateNow()});
  busy=false;
  if(error){alert((error.message||"").includes("old date")?"لا يمكن إدخال ورد يوم مضى":"تعذّر الإرسال، تأكد من الاتصال وحاول مرة أخرى");render();return}
  localStorage.setItem("tn_s_"+draft.id,"1");localStorage.setItem("tn_d_"+draft.id,JSON.stringify(draft.v));editing=false;render();window.scrollTo(0,0)}
@@ -226,7 +228,7 @@ async function loadAdmin(){
  while(true){const {data,error}=await sb.from("reports").select("*").range(from,from+999);if(error||!data)break;all=all.concat(data);if(data.length<1000)break;from+=1000}
  reports=all.map(r=>({name:r.name,date:r.report_date,day:r.day_idx,v:r.v,late:r.late}));
  const s=await sb.from("students").select("name");students=(s.data||[]).map(x=>x.name);render()}
-function pdays(){const t=new Date(today.getFullYear(),today.getMonth(),today.getDate());let s=new Date(t);
+function pdays(){const t=new Date(EFF+"T00:00:00");let s=new Date(t);
  if(period==="week")s.setDate(t.getDate()-dayIdx(t));else if(period==="month")s=new Date(t.getFullYear(),t.getMonth(),1);
  const a=[];for(let d=new Date(s);d<=t;d.setDate(d.getDate()+1)){const ds=iso(d);if(ds>=START)a.push({ds,i:dayIdx(d)})}return a}
 function stat(n,days){
@@ -244,7 +246,7 @@ function adminView(){
  if(!all.length)return h+`<div class="card msg">لا يوجد طلاب بعد</div>`+foot;
  if(period==="day"){
   const ds=viewDate,i=dayIdx(new Date(ds+"T00:00:00"));
-  h+=`<div class="noprint"><label>اختر التاريخ</label><input type="date" value="${ds}" onchange="viewDate=this.value||TD;render()"></div>`;
+  h+=`<div class="noprint"><label>اختر التاريخ</label><input type="date" value="${ds}" onchange="viewDate=this.value||EFF;render()">${EFF!==TD?'<div class="v" style="margin:-2px 0 8px">يعرض نتائج أمس حتى الساعة 12 ظهرًا</div>':''}</div>`;
   if(ds<START)return h+`<div class="card msg">قبل بداية البرنامج (${fmt(START)})</div>`+foot;
   const rep=n=>reports.find(x=>x.date===ds&&x.name===n);
   const used=KEYS.filter(k=>(SCHED[i][k]&&String(SCHED[i][k]).trim())||reports.some(r=>r.date===ds&&k in r.v));
@@ -273,23 +275,23 @@ function detailCards(all,byd){return `<div class="sv">`+more2(all.slice().revers
 const H2C="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js",JSPDF="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js";
 const PDFCSS=`:root{--pr:#0E5C4E;--gold:#B8923A;--gold2:#F6EEDA;--bd:#D5E1DC;--stripe:#F3F8F6;--mu:#5A6F68;--ok:#0E5C4E;--okbg:#DAEEE6;--bad:#A8432F;--badbg:#F8E5E0;--warn:#85570A;--warnbg:#F8EAC6}
 *{box-sizing:border-box}html,body{margin:0;background:#fff}
-body{width:794px;padding:40px 36px;font-family:"IBM Plex Sans Arabic","Noto Sans Arabic",Tahoma,sans-serif;color:#10231F;font-size:12px}
+body{width:794px;padding:40px 36px;font-family:"IBM Plex Sans Arabic","Noto Sans Arabic",Tahoma,sans-serif;color:#10231F;font-size:15px}
 .hd{background:linear-gradient(165deg,#08332D,#0E5C4E);color:#F6EFD8;text-align:center;padding:16px 12px 18px;border-radius:18px;margin-bottom:12px;border-bottom:4px solid var(--gold)}
 .bsm{font-family:Amiri,serif;color:#E6CC85;font-size:16px}.hd h1{font-family:"Reem Kufi",sans-serif;font-size:28px;margin:2px 0;color:#fff}
-.hd .sub{color:#E6CC85;font-size:12px}
-.sum{display:flex;gap:8px;margin-bottom:12px}.sum div{flex:1;border-radius:12px;padding:8px;text-align:center;font-weight:700}
-.sum small{display:block;font-weight:500;font-size:11px}
+.hd .sub{color:#E6CC85;font-size:14px}
+.sum{display:flex;gap:8px;margin-bottom:12px}.sum div{flex:1;border-radius:12px;padding:10px 8px;text-align:center;font-weight:700;font-size:21px}
+.sum small{display:block;font-weight:500;font-size:13px}
 table{border-collapse:separate;border-spacing:0;width:100%;border:1px solid var(--bd);border-radius:12px;overflow:hidden}
-th{background:linear-gradient(180deg,#0E5C4E,#08332D);color:#F6EFD8;font-family:"Reem Kufi",sans-serif;font-weight:500;padding:9px 8px;text-align:right;border-bottom:3px solid var(--gold)}
-td{padding:7px 8px;border-bottom:1px solid var(--bd);text-align:right}tr:nth-child(even) td{background:var(--stripe)}
-.num{color:var(--mu);width:28px}.nm{font-weight:500}
-.pill,.chip{display:inline-block;border-radius:99px;font-weight:700;padding:1px 10px}.pill{min-width:34px;text-align:center}
+th{background:linear-gradient(180deg,#0E5C4E,#08332D);color:#F6EFD8;font-family:"Reem Kufi",sans-serif;font-weight:500;font-size:15px;padding:11px 8px;text-align:right;border-bottom:3px solid var(--gold)}
+td{padding:9px 8px;font-size:15px;border-bottom:1px solid var(--bd);text-align:right}tr:nth-child(even) td{background:var(--stripe)}
+.num{color:var(--mu);width:34px}.nm{font-weight:500}
+.pill,.chip{display:inline-block;border-radius:99px;font-weight:700;font-size:14px;padding:2px 11px}.pill{min-width:34px;text-align:center}
 .ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
 .ok .pill,.ok .chip{background:var(--okbg)}.bad .pill,.bad .chip{background:var(--badbg)}.warn .chip{background:var(--warnbg)}
 .ft{text-align:center;font-family:Amiri,serif;color:var(--gold);font-size:16px;margin-top:12px}
 .hon{display:flex;gap:10px;margin-bottom:14px}.hon .c{flex:1;border:1.5px solid var(--gold);background:var(--gold2);border-radius:16px;padding:10px 6px;text-align:center}
 .hon .m{width:34px;height:34px;border-radius:50%;margin:0 auto 4px;color:#fff;font-weight:700;font-size:17px;line-height:34px;font-family:"Reem Kufi",sans-serif}
-.hon .n{font-weight:700;font-size:13px}.hon .p{color:var(--pr);font-weight:700;font-size:18px}
+.hon .n{font-weight:700;font-size:15px}.hon .p{color:var(--pr);font-weight:700;font-size:21px}
 .bar{height:7px;background:#E2EEE9;border-radius:6px;overflow:hidden;min-width:70px}.bar i{display:block;height:100%;background:#0E5C4E}
 .fr{border:2px solid var(--gold);outline:1px solid var(--gold);outline-offset:3px;border-radius:22px;padding:14px;margin:6px}
 .stt{text-align:center;margin-bottom:12px}.stt b{font-family:"Reem Kufi",sans-serif;font-size:28px;color:var(--pr)}.stt small{display:block;color:var(--mu);font-size:13px}
@@ -319,7 +321,7 @@ function periodPdfHtml(){
  const body=rows.map((r,j)=>`<tr><td class="num">${j+1}</td><td class="nm">${esc(r.n)}</td><td>${r.sent}/${days.length}</td><td><b>${r.pct}%</b><div class="bar"><i style="width:${r.pct}%"></i></div></td><td>${r.late}</td><td class="${r.miss.length?"bad":"ok"}">${r.miss.length?r.miss.map(d=>DAYS[d.i]).join("، "):"—"}</td></tr>`).join("");
  return PDOC(PHEAD(period==="week"?"التقرير الأسبوعي":"التقرير الشهري",`من ${gfmt(days[0].ds)} إلى ${gfmt(days[days.length-1].ds)}`)+hon+`<table><thead><tr><th>#</th><th>الطالب</th><th>أيام الإرسال</th><th>الإنجاز</th><th>التأخر</th><th>أيام لم يقرأ فيها ورده</th></tr></thead><tbody>${body}</tbody></table>`)}
 function studentPdfHtml(n){
- const all=[];for(let d=new Date(START+"T00:00:00");iso(d)<=TD;d.setDate(d.getDate()+1))all.push({ds:iso(d),i:dayIdx(d)});
+ const all=[];for(let d=new Date(START+"T00:00:00");iso(d)<=EFF;d.setDate(d.getDate()+1))all.push({ds:iso(d),i:dayIdx(d)});
  const st=stat(n,all),byd={};reports.filter(r=>r.name===n).forEach(r=>byd[r.date]=r);
  const body=all.map(d=>{const r=byd[d.ds],x={r,kind:kindP(r,d.i)};return r?`<tr><td class="nm">${DAYS[d.i]} ${d.ds.slice(5)}</td>${KEYS.map(k=>pcell(k,d.i,r)).join("")}${pstat(x)}</tr>`:`<tr><td class="nm">${DAYS[d.i]} ${d.ds.slice(5)}</td><td class="bad" colspan="5"><span class="chip">لم يقرأ ورده</span></td></tr>`}).join("");
  return PDOC(PHEAD("سجلّ الطالب",esc(n))+`<div class="sum"><div style="background:var(--okbg);color:var(--ok)">${st.sent}/${all.length}<small>أيام الإرسال</small></div><div style="background:var(--badbg);color:var(--bad)">${st.miss.length}<small>أيام لم يقرأ فيها ورده</small></div><div style="background:var(--warnbg);color:var(--warn)">${st.pct}%<small>نسبة الإنجاز</small></div></div><table><thead><tr><th>التاريخ</th>${KEYS.map(k=>`<th>${LBL[k]}</th>`).join("")}<th>الحالة</th></tr></thead><tbody>${body}</tbody></table>`)}
@@ -376,7 +378,7 @@ function waText(){
 function waShare(){window.open("https://wa.me/?text="+encodeURIComponent(waText()),"_blank")}
 async function waCopy(){try{await navigator.clipboard.writeText(waText());alert("تم نسخ التقرير ✅ الصقه في مجموعة الواتساب")}catch(e){prompt("انسخ النص:",waText())}}
 function detailView(){
- const n=detail,all=[];for(let d=new Date(START+"T00:00:00");iso(d)<=TD;d.setDate(d.getDate()+1))all.push({ds:iso(d),i:dayIdx(d)});
+ const n=detail,all=[];for(let d=new Date(START+"T00:00:00");iso(d)<=EFF;d.setDate(d.getDate()+1))all.push({ds:iso(d),i:dayIdx(d)});
  const st=stat(n,all),byd={};reports.filter(r=>r.name===n).forEach(r=>byd[r.date]=r);
  let h=`<div class="noprint"><button class="g" onclick="detail='';render()">↩ رجوع</button></div><div class="po">سجلّ الطالب: ${esc(n)}</div>
  <div class="card"><div class="t" style="font-size:18px">${esc(n)}</div>
