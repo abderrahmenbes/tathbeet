@@ -159,7 +159,7 @@ function buildDaily(ds, { SCHED, students, reports }) {
   const body = rows.map((x, j) => `<tr><td class="num">${j + 1}</td><td class="nm">${esc(x.n)}</td>${used.map((k) => cell(k, x.r)).join("")}${status(x)}</tr>`).join("");
   const h = fmtH(ds);
   return PAGE(HEAD("تقرير تثبيت القرآن", `${DAYS[i]} — ${fmtG(ds)}${h ? " • " + h : ""}`) +
-    `<div class="sum"><div style="background:var(--okbg);color:var(--ok)">${c[0]}<small>أتمّوا أوردتهم</small></div><div style="background:var(--warnbg);color:var(--warn)">${c[1]}<small>ورد ناقص</small></div><div style="background:var(--badbg);color:var(--bad)">${c[2]}<small>لم يقرؤوا أوردتهم</small></div></div>
+    `<div class="sum"><div style="background:var(--okbg);color:var(--ok)">${c[0]}<small>أتمّوا وردهم</small></div><div style="background:var(--warnbg);color:var(--warn)">${c[1]}<small>ورد ناقص</small></div><div style="background:var(--badbg);color:var(--bad)">${c[2]}<small>لم يقرءوا وردهم</small></div></div>
 <table><thead><tr><th>#</th><th>الطالب</th>${used.map((k) => `<th>${LBL[k]}</th>`).join("")}<th>الحالة</th></tr></thead><tbody>${body}</tbody></table>`);
 }
 
