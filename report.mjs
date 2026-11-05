@@ -4,7 +4,7 @@ import fs from "node:fs";
 const URL_ = process.env.SB_URL || "https://syuawkhtnikqoqsjdese.supabase.co";
 const TG_API = process.env.TG_API || "https://api.telegram.org";
 const KEY = "sb_publishable_XENRfQEvxfWgNcGzd6unPA_JaXNOACt";
-const { ADMIN_EMAIL, ADMIN_PASSWORD, TG_TOKEN, TG_CHAT, JOIN_CODE, REPORT_DATE, DRY_RUN, HTML_ONLY, SCHEDULE } = process.env;
+const { ADMIN_EMAIL, ADMIN_PASSWORD, TG_TOKEN, TG_CHAT, REPORT_DATE, DRY_RUN, HTML_ONLY, SCHEDULE } = process.env;
 // نوع التقرير يُستنتج من موعد الجدولة (عدة مواعيد متقاربة لكل نوع، والتكرار تمنعه علامة الإرسال)
 function modeFor(c) {
   if (!c) return "daily";
@@ -188,22 +188,20 @@ function buildWeekly(start, end, data) {
 }
 
 const IDS = (TG_CHAT || "").split(",").map((x) => x.trim()).filter(Boolean);
-async function rest(method, path, body) {
-  const r = await fetch(URL_ + path, { method, headers: { apikey: KEY, Authorization: "Bearer " + (await getToken()), "Content-Type": "application/json", Prefer: "resolution=merge-duplicates" }, body: body ? JSON.stringify(body) : undefined });
-  if (!r.ok) throw new Error(method + " " + path + " → " + r.status + " " + (await r.text()));
-}
-// المستلمون = المشرفون (TG_CHAT) + من انضموا عبر رابط البوت
-async function recipients() {
-  const ids = new Set(IDS);
+// المستلمون = أرقام TG_CHAT (المشرف) + من انضم من البوت عبر رابط الدعوة (يحفظها join.mjs في settings)
+async function allIds() {
+  const set = new Set(IDS);
   if (!DRY_RUN && !HTML_ONLY) {
-    try { (await api("/rest/v1/subscribers?select=chat_id&limit=1000", await getToken())).forEach((s) => ids.add(String(s.chat_id))); }
-    catch (e) { console.log("تنبيه: تعذّر قراءة المشتركين:", e.message); }
+    try {
+      const rec = await api("/rest/v1/settings?key=eq.recipients&select=value", await getToken());
+      if (rec[0] && Array.isArray(rec[0].value)) rec[0].value.forEach((x) => set.add(String(x.id)));
+    } catch (e) { console.log("تنبيه: تعذّرت قراءة قائمة المستلمين:", e.message); }
   }
-  return [...ids];
+  return [...set];
 }
 async function toAll(send) {
   let ok = 0; const errs = [];
-  for (const id of await recipients()) { try { await send(id); ok++; } catch (e) { errs.push(id + ": " + e.message); } }
+  for (const id of await allIds()) { try { await send(id); ok++; } catch (e) { errs.push(id + ": " + e.message); } }
   if (errs.length) console.log("تنبيه: تعذّر الإرسال إلى:", errs.join(" | "));
   if (!ok) throw new Error("لم يصل التقرير إلى أي مستلم");
 }
@@ -232,36 +230,6 @@ async function sendPdf(html, filename, caption) {
   });
   console.log("تم الإرسال ✅", filename);
 }
-
-// تسجيل المنضمين: من يفتح رابط البوت (start=الرمز السري) ويضغط Start يُضاف تلقائيًا
-async function syncSubscribers() {
-  const st = await api("/rest/v1/bot_state?key=eq.tg_offset&select=value", await getToken());
-  let offset = st[0] ? +st[0].value : 0;
-  const res = await (await fetch(`${TG_API}/bot${TG_TOKEN}/getUpdates?offset=${offset}&timeout=0&allowed_updates=${encodeURIComponent('["message"]')}`)).json();
-  if (!res.ok) throw new Error("getUpdates: " + JSON.stringify(res));
-  const say = (chat_id, text) => tg("sendMessage", { chat_id, text }).catch((e) => console.log("تعذّر الرد:", e.message));
-  for (const u of res.result) {
-    offset = Math.max(offset, u.update_id + 1);
-    const m = u.message;
-    if (!m || !m.chat || m.chat.type !== "private" || !m.text) continue;
-    const [c0, code] = m.text.trim().split(/\s+/), cmd = c0.split("@")[0].toLowerCase();
-    const id = String(m.chat.id), name = [m.from?.first_name, m.from?.last_name].filter(Boolean).join(" ");
-    if (cmd === "/start") {
-      if (JOIN_CODE && code === JOIN_CODE) {
-        await rest("POST", "/rest/v1/subscribers?on_conflict=chat_id", [{ chat_id: id, name }]);
-        await say(id, "✅ تم تسجيلك في تقارير تثبيت القرآن.\nستصلك التقارير اليومية والأسبوعية هنا بإذن الله.\nلإيقافها أرسل /stop");
-        for (const a of IDS) if (a !== id) await say(a, `👤 انضم مشترك جديد: ${name || id}`);
-      } else if (IDS.includes(id)) await say(id, "✅ أنت مسجّل كمشرف وتصلك التقارير.");
-      else await say(id, "هذا البوت خاص. اطلب من المشرف رابط الانضمام.");
-    } else if (cmd === "/stop") {
-      await rest("DELETE", `/rest/v1/subscribers?chat_id=eq.${id}`);
-      await say(id, "تم إلغاء اشتراكك. يمكنك العودة من رابط الانضمام متى شئت.");
-    }
-  }
-  await rest("POST", "/rest/v1/bot_state?on_conflict=key", [{ key: "tg_offset", value: String(offset) }]);
-  console.log("تمت المزامنة، تحديثات:", res.result.length);
-}
-if (MODE === "sync") { await syncSubscribers(); process.exit(0); }
 
 const wait = process.env.GITHUB_EVENT_NAME === "workflow_dispatch" || REPORT_DATE ? 0 : waitMs(Date.now(), SCHEDULE);
 if (wait) { console.log("انتظار حتى 23:57 بتوقيت الجزائر:", Math.round(wait / 60000), "دقيقة"); await new Promise((res) => setTimeout(res, wait)); }
