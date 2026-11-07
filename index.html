@@ -117,10 +117,12 @@ input.big{font-size:19px;padding:16px;text-align:center;border-radius:16px;margi
 .mr{margin-top:2px}
 .tb{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));background:#08332D;color:#F6EFD8;border:1px solid var(--gold);border-radius:16px;padding:10px 12px;display:flex;gap:8px;align-items:center;z-index:98;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
 .tb .g{background:rgba(255,255,255,.14);color:#F6EFD8}.tb #tbb{background:var(--gold);color:#fff}
+.ib{position:absolute;top:calc(env(safe-area-inset-top) + 8px);left:10px;width:auto;padding:5px 11px;font-size:12px;border-radius:99px;background:rgba(255,255,255,.14);color:#F6EFD8;border:1px solid rgba(230,204,133,.45);font-weight:500;z-index:2}
+@media (display-mode:standalone){.ib{display:none}}
 .po{display:none}.dh{font-family:"Reem Kufi",sans-serif;font-weight:700;margin:16px 0 4px;color:var(--pr)}label{font-size:13px;color:var(--mu)}
 @media (prefers-reduced-motion:no-preference){.seal{animation:pop .45s ease-out}@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}}
 @media print{.pt{display:block!important}.sv{display:none!important}:root{--bg:#fff;--card:#fff;--tx:#10231F;--mu:#4a5d57;--pr:#0E5C4E;--btn:#0E5C4E;--pr2:#E2EEE9;--bd:#cdd9d4;--gold:#B8923A;--gold2:#F6EEDA;--bad:#A8432F;--badbg:#F8E5E0;--ok:#0E5C4E;--okbg:#DAEEE6;--warn:#85570A;--warnbg:#F8EAC6;--hd1:#08332D;--hd2:#0E5C4E;--stripe:#F3F8F6}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}.noprint{display:none!important}.po{display:block;text-align:center;font-weight:700;font-size:18px;margin-bottom:10px}.card{border:0;padding:0}.card.frame{border:2px solid var(--gold);padding:12px}body{background:#fff}.w{max-width:none;padding:0}.sc{overflow:visible}.nmh,td:has(>.nm){position:static;box-shadow:none}}
-</style></head><body><header id="hd" class="hd noprint"><div class="bsm">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div><h1>تثبيت القرآن</h1><div class="tg">استعدادًا لشهر رمضان المبارك</div><div class="sub"><span id="today"></span> &nbsp;•&nbsp; <span id="hj"></span></div></header>
+</style></head><body><header id="hd" class="hd noprint"><button id="ib" class="ib" onclick="installTap()">📲 ثبّت التطبيق</button><div class="bsm">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div><h1>تثبيت القرآن</h1><div class="tg">استعدادًا لشهر رمضان المبارك</div><div class="sub"><span id="today"></span> &nbsp;•&nbsp; <span id="hj"></span></div></header>
 <div class="w">
 <div id="app"><div class="msg">جارٍ التحميل…</div></div></div>
 <script>
@@ -219,8 +221,8 @@ function streak(){let n=0;for(let d=new Date(today);;d.setDate(d.getDate()-1)){c
 function streakMsg(){const n=streak();if(n>=2)return `<div class="streak">🌟 أتممت أوراد ${n} أيام متتالية، بارك الله فيك وواصل</div>`;if(n===1)return `<div class="streak">🌱 بداية طيبة، واصل غدًا بإذن الله</div>`;return ""}
 function successView(i){
  let v={};try{v=JSON.parse(localStorage.getItem("tn_d_"+TD+"_"+me)||"{}")}catch(e){}
- return `<div class="card sx hit"><div class="seal">✓</div><div class="st2">${qHas(TD,me)?"تم حفظ تقريرك":"تم إرسال تقريرك"}</div><div class="v">${esc(me)} — ${DAYS[i]}</div><div class="bl">بارك الله فيك وجعله في ميزان حسناتك 🌙</div>${qHas(TD,me)?'<div class="note" style="margin-bottom:14px">⏳ حُفظ تقريرك على جوالك، وسيصل تلقائيًا عند عودة الاتصال.</div>':''}${streakMsg()}${installHint()}<div class="sm">${items(i).map(it=>`<div class="sr"><span>${it[1]}</span>${v[it[0]]==null?"":pl(it[0],i,v[it[0]])}</div>`).join("")}</div><button class="g" onclick="startEdit()">↩ تعديل إجاباتي</button></div>`}
-const BUILD="25";
+ return `<div class="card sx hit"><div class="seal">✓</div><div class="st2">${qHas(TD,me)?"تم حفظ تقريرك":"تم إرسال تقريرك"}</div><div class="v">${esc(me)} — ${DAYS[i]}</div><div class="bl">بارك الله فيك وجعله في ميزان حسناتك 🌙</div>${qHas(TD,me)?'<div class="note" style="margin-bottom:14px">⏳ حُفظ تقريرك على جوالك، وسيصل تلقائيًا عند عودة الاتصال.</div>':''}${streakMsg()}<div class="sm">${items(i).map(it=>`<div class="sr"><span>${it[1]}</span>${v[it[0]]==null?"":pl(it[0],i,v[it[0]])}</div>`).join("")}</div><button class="g" onclick="startEdit()">↩ تعديل إجاباتي</button></div>`}
+const BUILD="26";
 function toast(msg,label,fn){let t=$("tb");if(!t){t=document.createElement("div");t.id="tb";t.className="tb noprint";document.body.appendChild(t)}
  t.innerHTML=`<span style="flex:1">${msg}</span>${label?`<button class="s" id="tbb">${label}</button>`:""}<button class="s g" id="tbx">✕</button>`;
  $("tbx").onclick=()=>t.remove();if(label)$("tbb").onclick=()=>{t.remove();fn()};
@@ -231,17 +233,17 @@ async function checkUpdate(){
  try{const r=await fetch(location.pathname,{cache:"no-store"});if(!r.ok)return;const m=(await r.text()).match(/const BUILD="([^"]+)"/);
   if(m&&m[1]!==BUILD&&!$("tb"))toast("🔄 يوجد تحديث جديد للتطبيق","تحديث",()=>location.reload())}catch(e){}}
 let dip=null;
-window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();dip=e;if(page==="student")render()});
-window.addEventListener("appinstalled",()=>{dip=null;localStorage.setItem("tn_inst","1");render()});
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();dip=e});
+window.addEventListener("appinstalled",()=>{dip=null;const b=$("ib");if(b)b.hidden=true});
 const isStd=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
 const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
-function installHint(){
- if(isStd()||localStorage.getItem("tn_inst"))return"";
- if(dip)return `<div class="note" style="margin-bottom:14px">📲 ثبّت التطبيق على جوالك ليُفتح بسرعة من الشاشة الرئيسية<div class="row" style="margin-top:8px"><button class="s" onclick="doInstall()">تثبيت التطبيق</button><button class="s g" onclick="hideInst()">لاحقًا</button></div></div>`;
- if(isIOS())return `<div class="note" style="margin-bottom:14px">📲 لإضافة التطبيق إلى شاشتك الرئيسية: اضغط زر المشاركة ⬆ ثم «إضافة إلى الشاشة الرئيسية»<div class="row" style="margin-top:8px"><button class="s g" onclick="hideInst()">فهمت</button></div></div>`;
- return""}
-async function doInstall(){if(!dip)return;dip.prompt();try{await dip.userChoice}catch(e){}dip=null;render()}
-function hideInst(){localStorage.setItem("tn_inst","1");render()}
+if(isStd()){const b=$("ib");if(b)b.hidden=true}
+async function installTap(){
+ if(dip){dip.prompt();try{await dip.userChoice}catch(e){}dip=null;return}
+ const st=n=>`<div style="display:flex;gap:10px;align-items:flex-start;margin:8px 0"><span class="ix">${n[0]}</span><span>${n[1]}</span></div>`;
+ const steps=isIOS()?st(["1","اضغط زر المشاركة ⬆ في Safari"])+st(["2","اختر «إضافة إلى الشاشة الرئيسية»"])+st(["3","اضغط «إضافة»"])
+  :st(["1","اضغط ⋮ أعلى المتصفح (Chrome)"])+st(["2","اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية»"])+'<div class="v" style="margin-top:6px">إن كان مثبتًا من قبل فافتحه من أيقونته على الشاشة الرئيسية.</div>';
+ ovShow(`<div class="t" style="text-align:center;font-size:17px;margin-bottom:6px">📲 تثبيت التطبيق</div>${steps}<div style="height:10px"></div><button onclick="ovClose()">حسنًا</button>`)}
 let lastK="";
 function setv(k,n){buzz(n>0?12:[8,30,8]);const i=dayIdx(today),first=items(i).find(it=>draft.v[it[0]]==null);draft.v[k]=n;lastK=k;if(n===0||n===maxOf(k,i))delete ex[k];render();
  if(first&&first[0]===k){const nx=items(i).find(it=>draft.v[it[0]]==null);if(nx)setTimeout(()=>{const e=$("it_"+nx[0]);if(e)e.scrollIntoView({behavior:"smooth",block:"center"})},200)}}
