@@ -205,6 +205,29 @@ async function toAll(send) {
   if (errs.length) console.log("تنبيه: تعذّر الإرسال إلى:", errs.join(" | "));
   if (!ok) throw new Error("لم يصل التقرير إلى أي مستلم");
 }
+const VAPID_PUBLIC = "BHSarUmE0f894qnDMlJTzpW6EdvEBcez0oE4pfrn7ewREyH6ATfUo5xu6E7agEuzRBS9jiSuG0G6P-6L7Zvt24Q";
+// تذكير مسائي على جوال الطلاب الذين فعّلوا الإشعارات ولم يسجّلوا ورد اليوم
+async function pushMissing(sentNames) {
+  if (!process.env.VAPID_PRIVATE) { console.log("لا يوجد VAPID_PRIVATE، تخطّي إشعارات الطلاب"); return; }
+  const token = await getToken();
+  const subs = await api("/rest/v1/push_subs?select=endpoint,name,sub&limit=5000", token);
+  const targets = subs.filter((s) => !sentNames.has(s.name));
+  if (!targets.length) { console.log("لا يوجد طلاب يحتاجون إشعارًا"); return; }
+  const wp = (await import("web-push")).default;
+  wp.setVapidDetails("https://abderrahmenbes.github.io/tathbeet/", VAPID_PUBLIC, process.env.VAPID_PRIVATE);
+  const payload = JSON.stringify({ title: "🌙 تذكير تثبيت القرآن", body: "لم تسجّل ورد اليوم بعد. بضع ضغطات وتنتهي، وآخر موعد قبل 11:30 مساءً." });
+  let ok = 0, gone = 0;
+  for (const s of targets) {
+    try { await wp.sendNotification(s.sub, payload); ok++; }
+    catch (e) {
+      if (e.statusCode === 404 || e.statusCode === 410) {
+        gone++;
+        await fetch(`${URL_}/rest/v1/push_subs?endpoint=eq.${encodeURIComponent(s.endpoint)}`, { method: "DELETE", headers: { apikey: KEY, Authorization: "Bearer " + token } }).catch(() => {});
+      } else console.log("تنبيه: تعذّر إشعار", s.name, e.statusCode || e.message);
+    }
+  }
+  console.log("إشعارات الطلاب: أُرسل", ok, "— اشتراكات منتهية حُذفت", gone);
+}
 async function tg(method, body) {
   const res = await fetch(`${TG_API}/bot${TG_TOKEN}/${method}`, body instanceof FormData ? { method: "POST", body }
     : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
@@ -252,7 +275,10 @@ if (MODE === "weekly") {
     const text = miss.length
       ? `⏰ تذكير تثبيت القرآن\nلم يرسل أوراد اليوم بعد (${miss.length} من ${names.length}):\n\n${miss.map((n, j) => `${j + 1}. ${n}`).join("\n")}\n\nالموعد الأخير: قبل الساعة 11:30 مساءً.`
       : `✅ جميع الطلاب (${names.length}) أرسلوا أوراد اليوم، بارك الله فيهم.`;
-    if (DRY_RUN || HTML_ONLY) console.log(text); else { await toAll((id) => tg("sendMessage", { chat_id: id, text })); console.log("تم إرسال التذكير ✅"); }
+    if (DRY_RUN || HTML_ONLY) console.log(text); else {
+      await toAll((id) => tg("sendMessage", { chat_id: id, text })); console.log("تم إرسال التذكير ✅");
+      try { await pushMissing(sent); } catch (e) { console.log("تنبيه: تعذّرت إشعارات الطلاب:", e.message); }
+    }
   });
 } else {
   await once("sent_daily", ds, async () => {
