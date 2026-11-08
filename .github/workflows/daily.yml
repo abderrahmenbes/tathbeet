@@ -28,7 +28,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install playwright@1.47.0 --no-save
+      - run: npm install playwright@1.47.0 web-push@3.6.7 --no-save
       - run: npx playwright install --with-deps chromium
       - run: node report.mjs
         env:
@@ -36,5 +36,6 @@ jobs:
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
           TG_CHAT: ${{ secrets.TG_CHAT }}
+          VAPID_PRIVATE: ${{ secrets.VAPID_PRIVATE }}
           SCHEDULE: ${{ github.event.schedule }}
           MODE: ${{ inputs.mode }}
