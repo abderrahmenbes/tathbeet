@@ -117,12 +117,22 @@ input.big{font-size:19px;padding:16px;text-align:center;border-radius:16px;margi
 .mr{margin-top:2px}
 .tb{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));background:#08332D;color:#F6EFD8;border:1px solid var(--gold);border-radius:16px;padding:10px 12px;display:flex;gap:8px;align-items:center;z-index:98;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
 .tb .g{background:rgba(255,255,255,.14);color:#F6EFD8}.tb #tbb{background:var(--gold);color:#fff}
-.ib{position:absolute;top:calc(env(safe-area-inset-top) + 8px);left:10px;width:auto;padding:5px 11px;font-size:12px;border-radius:99px;background:rgba(255,255,255,.14);color:#F6EFD8;border:1px solid rgba(230,204,133,.45);font-weight:500;z-index:2}
-@media (display-mode:standalone){.ib,.pi{display:none}}
+.instb{position:absolute;top:calc(env(safe-area-inset-top) + 8px);left:10px;width:auto;padding:5px 11px;font-size:12px;border-radius:99px;background:rgba(255,255,255,.14);color:#F6EFD8;border:1px solid rgba(230,204,133,.45);font-weight:500;z-index:2}
+@media (display-mode:standalone){.instb,.pi{display:none}}
+.hd .rm{margin-top:7px;display:inline-block;padding:3px 13px;border-radius:99px;background:rgba(230,204,133,.16);color:#E6CC85;font-size:13px}.hd .rm:empty,.hd.mini .rm{display:none}
+.pb{width:auto;padding:8px 14px;font-size:13px;border-radius:99px;background:var(--gold);color:#fff;flex:none}
+.cal{margin:4px 0 6px}.cl{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px}.cl b{text-align:center;font-size:11px;color:var(--mu);font-weight:500}
+.ce{aspect-ratio:1;border-radius:9px;display:grid;place-items:center;font-size:12px;font-style:normal;background:var(--pr2);color:var(--mu)}
+.ce.full{background:var(--btn);color:#fff}.ce.part{background:var(--gold);color:#fff}.ce.miss{background:var(--bad);color:#fff}.ce.none{opacity:.55}.ce.e{background:transparent}.ce.td{outline:2px solid var(--gold);outline-offset:1px}
+.lg2{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;color:var(--mu);margin:6px 0 4px}.lg2 span{display:inline-flex;align-items:center;gap:5px}.lg2 .ce{width:14px;height:14px;aspect-ratio:auto;border-radius:4px;display:inline-block}
+.bg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 12px}
+.bd{border:1.5px solid var(--bd);border-radius:14px;padding:10px 8px;text-align:center;font-size:12.5px}.bd b{display:block;font-size:26px;line-height:1.3}.bd.on{border-color:var(--gold);background:var(--gold2)}.bd.off{opacity:.55}.bd small{color:var(--mu);display:block}
+.st3{display:flex;gap:8px;margin:8px 0}.st3 div{flex:1;border-radius:12px;background:var(--pr2);padding:8px 4px;text-align:center;font-size:12px;color:var(--mu)}.st3 b{display:block;font-size:19px;color:var(--pr)}
+.ov>.card{max-height:88vh;overflow:auto}
 .po{display:none}.dh{font-family:"Reem Kufi",sans-serif;font-weight:700;margin:16px 0 4px;color:var(--pr)}label{font-size:13px;color:var(--mu)}
 @media (prefers-reduced-motion:no-preference){.seal{animation:pop .45s ease-out}@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}}
 @media print{.pt{display:block!important}.sv{display:none!important}:root{--bg:#fff;--card:#fff;--tx:#10231F;--mu:#4a5d57;--pr:#0E5C4E;--btn:#0E5C4E;--pr2:#E2EEE9;--bd:#cdd9d4;--gold:#B8923A;--gold2:#F6EEDA;--bad:#A8432F;--badbg:#F8E5E0;--ok:#0E5C4E;--okbg:#DAEEE6;--warn:#85570A;--warnbg:#F8EAC6;--hd1:#08332D;--hd2:#0E5C4E;--stripe:#F3F8F6}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}.noprint{display:none!important}.po{display:block;text-align:center;font-weight:700;font-size:18px;margin-bottom:10px}.card{border:0;padding:0}.card.frame{border:2px solid var(--gold);padding:12px}body{background:#fff}.w{max-width:none;padding:0}.sc{overflow:visible}.nmh,td:has(>.nm){position:static;box-shadow:none}}
-</style></head><body><header id="hd" class="hd noprint"><button id="ib" class="ib" onclick="installTap()">📲 ثبّت التطبيق</button><div class="bsm">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div><h1>تثبيت القرآن</h1><div class="tg">استعدادًا لشهر رمضان المبارك</div><div class="sub"><span id="today"></span> &nbsp;•&nbsp; <span id="hj"></span></div></header>
+</style></head><body><header id="hd" class="hd noprint"><button id="ib" class="instb" onclick="installTap()">📲 ثبّت التطبيق</button><div class="bsm">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div><h1>تثبيت القرآن</h1><div class="tg">استعدادًا لشهر رمضان المبارك</div><div class="sub"><span id="today"></span> &nbsp;•&nbsp; <span id="hj"></span></div><div class="rm" id="rm"></div></header>
 <div class="w">
 <div id="app"><div class="msg">جارٍ التحميل…</div></div></div>
 <script>
@@ -137,7 +147,7 @@ const DEF=[
 {t:"الحزب 5",q:"الحزب 4",l:"من الآية 53 إلى نهاية سورة الكهف",k:"سورة يس (3 مرات)"},
 {t:"الحزب 6",q:"الحزب 5",l:"من بداية سورة مريم إلى نهاية سورة النور",k:"سورة يس (3 مرات)"},
 {t:"تسميع مقرر الأسبوع",q:"الحزب 6",l:"",k:"سورة يس (3 مرات)"}];
-let SCHED=JSON.parse(JSON.stringify(DEF)),START="2026-10-31";
+let SCHED=JSON.parse(JSON.stringify(DEF)),START="2026-10-31",RAMADAN="2027-02-08";
 const LBL={t:"ورد التثبيت",q:"مراجعة القريب",l:"ورد التلاوة",k:"ورد التخصيص"},KEYS=["t","q","l","k"];
 const maxOf=(k,day)=>k==="t"?(day===6?0:7):k==="k"?3:0;
 const dayIdx=d=>(d.getDay()+1)%7;
@@ -164,7 +174,8 @@ async function loadSettings(){
  else{try{rows=JSON.parse(localStorage.getItem("tn_cfg")||"null")}catch(e){}}
  (rows||[]).forEach(r=>{
   if(r.key==="schedule"&&Array.isArray(r.value)&&r.value.length===7)SCHED=r.value.map((x,i)=>Object.assign({},DEF[i],x));
-  if(r.key==="start"&&typeof r.value==="string")START=r.value})}
+  if(r.key==="start"&&typeof r.value==="string")START=r.value;
+  if(r.key==="ramadan"&&typeof r.value==="string")RAMADAN=r.value})}
 async function init(){
  await loadSettings();
  try{const {data}=await sb.from("students").select("name");names=(data||[]).map(x=>x.name)}catch(e){}
@@ -185,11 +196,12 @@ function startEdit(){editing=true;navPush();render()}
 function render(){
  const act=document.activeElement&&document.activeElement.id;
  $("hd").classList.toggle("mini",!(page==="student"&&!me));
+ $("rm").textContent=ramText();
  app.innerHTML=page==="student"?studentView():page==="login"?loginView():adminView();
  if(act&&$(act)&&$(act).tagName==="INPUT"&&$(act).type==="text"){const e=$(act);e.focus();try{e.setSelectionRange(e.value.length,e.value.length)}catch(x){}}}
 // ---------- student
 function studentView(){
- const foot=`<div class="lk"><a onclick="goAdmin()">دخول المشرف</a></div>`;
+ const foot=`<div class="lk">${me?'<a onclick="logout()">ليس أنت؟</a> &nbsp;•&nbsp; ':''}<a onclick="goAdmin()">دخول المشرف</a></div>`;
  if(!me){const v=($("nm")&&$("nm").value)||"";
   return `<div class="lg pop"><div class="lt">السلام عليكم ورحمة الله</div><div class="ls">اكتب اسمك للبدء</div>
   <input id="nm" class="big" type="text" value="${esc(v)}" placeholder="اسمك الكامل" oninput="sugg()" onkeydown="if(event.key==='Enter')login(this.value)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go">
@@ -197,7 +209,7 @@ function studentView(){
   <button class="cta" onclick="login($('nm').value)">ابدأ</button>
   <div class="cap">اكتب اسمك بنفس الطريقة في كل مرة ليبقى سجلّك محفوظًا</div></div>${foot}`}
  const i=dayIdx(today),id=TD+"_"+me;
- const head=`<div class="gr"><div class="av">${esc([...me][0]||"")}</div><div class="gi"><b>مرحبًا ${esc(me)}</b><small>ورد يوم ${DAYS[i]}</small></div><button class="lnk" onclick="logout()">ليس أنت؟</button></div>`;
+ const head=`<div class="gr"><div class="av">${esc([...me][0]||"")}</div><div class="gi"><b>مرحبًا ${esc(me)}</b><small>ورد يوم ${DAYS[i]}${ramText()?" • "+ramText():""}</small></div><button class="pb" onclick="myLog()">📅 سجلّي</button></div>`;
  if(TD<START)return head+`<div class="card msg pop"><div style="font-size:42px">🌙</div><div class="t">يبدأ البرنامج بإذن الله</div><div>${fmt(START)}</div></div>`+foot;
  if(localStorage.getItem("tn_s_"+id)&&!editing)return successView(i)+foot;
  if(draft.id!==id){let o={};try{o=JSON.parse(localStorage.getItem("tn_d_"+id)||"{}")}catch(e){}draft={id,v:o}}
@@ -221,8 +233,8 @@ function streak(){let n=0;for(let d=new Date(today);;d.setDate(d.getDate()-1)){c
 function streakMsg(){const n=streak();if(n>=2)return `<div class="streak">🌟 أتممت أوراد ${n} أيام متتالية، بارك الله فيك وواصل</div>`;if(n===1)return `<div class="streak">🌱 بداية طيبة، واصل غدًا بإذن الله</div>`;return ""}
 function successView(i){
  let v={};try{v=JSON.parse(localStorage.getItem("tn_d_"+TD+"_"+me)||"{}")}catch(e){}
- return `<div class="card sx hit"><div class="seal">✓</div><div class="st2">${qHas(TD,me)?"تم حفظ تقريرك":"تم إرسال تقريرك"}</div><div class="v">${esc(me)} — ${DAYS[i]}</div><div class="bl">بارك الله فيك وجعله في ميزان حسناتك 🌙</div>${qHas(TD,me)?'<div class="note" style="margin-bottom:14px">⏳ حُفظ تقريرك على جوالك، وسيصل تلقائيًا عند عودة الاتصال.</div>':''}${streakMsg()}<div class="pi" style="margin:-4px 0 12px"><button class="lnk" onclick="installTap()">📲 سجّل أسرع غدًا بضغطة واحدة: ثبّت التطبيق</button></div><div class="sm">${items(i).map(it=>`<div class="sr"><span>${it[1]}</span>${v[it[0]]==null?"":pl(it[0],i,v[it[0]])}</div>`).join("")}</div><button class="g" onclick="startEdit()">↩ تعديل إجاباتي</button></div>`}
-const BUILD="27";
+ return `<div class="card sx hit"><div class="seal">✓</div><div class="st2">${qHas(TD,me)?"تم حفظ تقريرك":"تم إرسال تقريرك"}</div><div class="v">${esc(me)} — ${DAYS[i]}</div><div class="bl">بارك الله فيك وجعله في ميزان حسناتك 🌙</div>${newBadgeNote()}${qHas(TD,me)?'<div class="note" style="margin-bottom:14px">⏳ حُفظ تقريرك على جوالك، وسيصل تلقائيًا عند عودة الاتصال.</div>':''}${streakMsg()}<div class="pi" style="margin:-4px 0 12px"><button class="lnk" onclick="installTap()">📲 سجّل أسرع غدًا بضغطة واحدة: ثبّت التطبيق</button></div><div class="sm">${items(i).map(it=>`<div class="sr"><span>${it[1]}</span>${v[it[0]]==null?"":pl(it[0],i,v[it[0]])}</div>`).join("")}</div><button class="g" onclick="startEdit()">↩ تعديل إجاباتي</button><div style="height:8px"></div><button class="g" onclick="myLog()">📅 سجلّي وشاراتي</button></div>`}
+const BUILD="28";
 function toast(msg,label,fn){let t=$("tb");if(!t){t=document.createElement("div");t.id="tb";t.className="tb noprint";document.body.appendChild(t)}
  t.innerHTML=`<span style="flex:1">${msg}</span>${label?`<button class="s" id="tbb">${label}</button>`:""}<button class="s g" id="tbx">✕</button>`;
  $("tbx").onclick=()=>t.remove();if(label)$("tbb").onclick=()=>{t.remove();fn()};
@@ -267,6 +279,66 @@ async function disablePush(){
  pstate="off";render()}
 async function syncPush(){try{if(!me||pstate!=="on")return;const reg=await navigator.serviceWorker.getRegistration();const sub=reg&&await reg.pushManager.getSubscription();if(sub)await savePush(sub)}catch(e){}}
 const pushLink=()=>pstate==="off"?`<div style="margin-top:4px"><button class="lnk" style="padding:2px 0" onclick="enablePush()">🔔 فعّل تذكير المساء على هذا الجهاز</button></div>`:pstate==="on"?`<div class="v" style="margin-top:4px">🔔 تذكير المساء مفعّل <button class="lnk" onclick="disablePush()">إيقاف</button></div>`:"";
+function ramText(){
+ if(!RAMADAN)return"";const n=Math.round((new Date(RAMADAN+"T00:00:00")-new Date(TD+"T00:00:00"))/86400000);
+ if(n>0)return"🌙 باقٍ على رمضان "+(n===1?"يوم واحد":n===2?"يومان":n<=10?n+" أيام":n+" يومًا");
+ return n===0?"🌙 رمضان مبارك! اليوم أول أيامه":""}
+const BADGES=[
+ {id:"first",ic:"🌱",n:"أول تقرير",need:1,val:s=>s.sent},
+ {id:"full1",ic:"🌟",n:"أول يوم كامل",need:1,val:s=>s.full},
+ {id:"s3",ic:"🔥",n:"3 أيام متتالية",need:3,val:s=>s.best},
+ {id:"s7",ic:"🏅",n:"أسبوع متتالٍ كامل",need:7,val:s=>s.best},
+ {id:"s14",ic:"🏆",n:"14 يومًا متتالية",need:14,val:s=>s.best},
+ {id:"s30",ic:"👑",n:"30 يومًا متتالية",need:30,val:s=>s.best},
+ {id:"t5",ic:"📖",n:"ورد التثبيت كاملًا 5 مرات",need:5,val:s=>s.t},
+ {id:"f10",ic:"🕌",n:"10 أيام بأوراد كاملة",need:10,val:s=>s.full},
+ {id:"f30",ic:"💎",n:"30 يومًا بأوراد كاملة",need:30,val:s=>s.full}];
+function myStats(){
+ const days={};let t=0;
+ for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);
+  if(!k||!k.startsWith("tn_d_")||k.slice(15)!=="_"+me)continue;
+  const ds=k.slice(5,15);if(!/^\d{4}-\d{2}-\d{2}$/.test(ds)||ds<START)continue;
+  let v;try{v=JSON.parse(localStorage.getItem(k))}catch(e){continue}if(!v)continue;
+  const di=dayIdx(new Date(ds+"T00:00:00")),its=items(di);
+  days[ds]=its.length&&its.every(it=>okv(it[0],di,v[it[0]]))?"full":"part";
+  if(v.t!=null&&okv("t",di,v.t))t++}
+ const ds=Object.keys(days).sort();let best=0,run=0,prev=null;
+ ds.forEach(d=>{if(days[d]==="full"){run=prev&&Math.round((new Date(d+"T00:00:00")-new Date(prev+"T00:00:00"))/86400000)===1?run+1:1;prev=d;best=Math.max(best,run)}else{run=0;prev=null}});
+ let cur=0;const d=new Date(today);if(days[iso(d)]!=="full")d.setDate(d.getDate()-1);
+ while(days[iso(d)]==="full"){cur++;d.setDate(d.getDate()-1)}
+ return{days,sent:ds.length,full:ds.filter(d=>days[d]==="full").length,best,cur,t}}
+function awardBadges(){
+ try{const st=myStats(),earned=BADGES.filter(b=>b.val(st)>=b.need).map(b=>b.id);
+  const key="tn_bd_"+me;let old=[];try{old=JSON.parse(localStorage.getItem(key)||"[]")}catch(e){}
+  const nw=earned.filter(x=>!old.includes(x));
+  localStorage.setItem(key,JSON.stringify(earned));
+  localStorage.setItem("tn_bn_"+TD+"_"+me,JSON.stringify(nw));
+  if(nw.length)buzz([40,60,40,60,80])}catch(e){}}
+function newBadgeNote(){
+ let nw=[];try{nw=JSON.parse(localStorage.getItem("tn_bn_"+TD+"_"+me)||"[]")}catch(e){}
+ const b=BADGES.filter(x=>nw.includes(x.id));
+ return b.length?`<div class="note" style="margin-bottom:14px">🎉 مبارك! شارة جديدة: ${b.map(x=>x.ic+" "+x.n).join("، ")}</div>`:""}
+const CALDAYS=["س","ح","ن","ث","ر","خ","ج"];
+function calHtml(get,from,to){
+ const start=new Date(from+"T00:00:00");start.setDate(start.getDate()-dayIdx(start));const end=new Date(to+"T00:00:00");
+ let h=`<div class="cal"><div class="cl">${CALDAYS.map(x=>`<b>${x}</b>`).join("")}</div>`;
+ for(const d=new Date(start);d<=end;){h+=`<div class="cl">`;
+  for(let k=0;k<7;k++){const ds=iso(d);
+   h+=ds<from||ds>to?`<i class="ce e"></i>`:`<i class="ce ${get(ds)||"none"}${ds===TD?" td":""}" title="${ds}">${d.getDate()}</i>`;
+   d.setDate(d.getDate()+1)}
+  h+=`</div>`}
+ return h+`</div>`}
+const calLegend=(adm)=>`<div class="lg2"><span><i class="ce full"></i> أتمّ ورده</span><span><i class="ce part"></i> ناقص أو متأخر</span>${adm?'<span><i class="ce miss"></i> لم يقرأ</span>':'<span><i class="ce none"></i> لا تسجيل على هذا الجهاز</span>'}</div>`;
+function myLog(){
+ if(!me)return;
+ const st=myStats(),to=TD<START?START:TD;
+ const bd=BADGES.map(b=>{const v=b.val(st),on=v>=b.need;return`<div class="bd ${on?"on":"off"}"><b>${b.ic}</b>${b.n}<small>${on?"✓ حصلت عليها":Math.min(v,b.need)+" / "+b.need}</small></div>`}).join("");
+ const cal=TD<START?`<div class="msg">يبدأ البرنامج بإذن الله</div>`:calHtml(ds=>st.days[ds],START,to)+calLegend(false);
+ const rt=ramText();
+ ovShow(`<div class="t" style="text-align:center;font-size:18px">📅 سجلّي — ${esc(me)}</div>${rt?`<div class="note" style="margin:10px 0 4px;text-align:center">${rt}</div>`:""}
+ <div class="st3"><div><b>${st.sent}</b>أيام مسجّلة</div><div><b>${st.full}</b>أيام كاملة</div><div><b>${st.cur}</b>السلسلة الحالية</div><div><b>${st.best}</b>أطول سلسلة</div></div>
+ ${cal}<div class="t" style="margin:12px 0 2px">🏅 شاراتي</div><div class="bg">${bd}</div>
+ <div class="v" style="font-size:12px;margin-bottom:10px">يعرض هذا السجل ما سُجّل من هذا الجهاز.</div><button onclick="ovClose()">إغلاق</button>`)}
 let lastK="";
 function setv(k,n){buzz(n>0?12:[8,30,8]);const i=dayIdx(today),first=items(i).find(it=>draft.v[it[0]]==null);draft.v[k]=n;lastK=k;if(n===0||n===maxOf(k,i))delete ex[k];render();
  if(first&&first[0]===k){const nx=items(i).find(it=>draft.v[it[0]]==null);if(nx)setTimeout(()=>{const e=$("it_"+nx[0]);if(e)e.scrollIntoView({behavior:"smooth",block:"center"})},200)}}
@@ -304,7 +376,7 @@ async function save(){
  busy=false;
  if(error&&error.code){alert((error.message||"").includes("old date")?"لا يمكن إدخال ورد يوم مضى":"تعذّر الإرسال، حاول مرة أخرى");render();return}
  if(error)qAdd(rec);else qDrop(rec);
- localStorage.setItem("tn_s_"+draft.id,"1");localStorage.setItem("tn_d_"+draft.id,JSON.stringify(draft.v));editing=false;buzz([25,40,25]);render();window.scrollTo(0,0);
+ localStorage.setItem("tn_s_"+draft.id,"1");localStorage.setItem("tn_d_"+draft.id,JSON.stringify(draft.v));editing=false;awardBadges();buzz([25,40,25]);render();window.scrollTo(0,0);
  if(history.state&&history.state.snap&&history.state.snap.editing)history.back();
  if(error)setTimeout(flushQ,15000)}
 // ---------- admin
@@ -388,6 +460,7 @@ td{padding:9px 8px;font-size:15px;border-bottom:1px solid var(--bd);text-align:r
 .fr{border:2px solid var(--gold);outline:1px solid var(--gold);outline-offset:3px;border-radius:22px;padding:14px;margin:6px}
 .stt{text-align:center;margin-bottom:12px}.stt b{font-family:"Reem Kufi",sans-serif;font-size:28px;color:var(--pr)}.stt small{display:block;color:var(--mu);font-size:13px}
 .sc2 th,.sc2 td{text-align:center;white-space:normal;padding:10px 6px}.dy{font-family:"Reem Kufi",sans-serif;font-weight:700;color:var(--pr);font-size:15px}
+.cal{margin:2px 0 8px}.cl{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:5px}.cl b{text-align:center;font-size:12px;color:#5A6F68;font-weight:500}.ce{height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-style:normal;background:#E2EEE9;color:#5A6F68}.ce.full{background:#0E5C4E;color:#fff}.ce.part{background:#B8923A;color:#fff}.ce.miss{background:#A8432F;color:#fff}.ce.e{background:transparent}.lg2{display:flex;gap:14px;font-size:12px;color:#5A6F68;margin:4px 0 12px}.lg2 span{display:inline-flex;align-items:center;gap:5px}.lg2 .ce{width:14px;height:14px;display:inline-block;border-radius:4px}
 .sc2 tr td{background:#fff}.sc2 tr.g td{background:var(--gold2)}.sc2 tr.e td{background:#E2EEE9}`;
 const gfmt=ds=>new Intl.DateTimeFormat("ar",{timeZone:"UTC",day:"numeric",month:"long",year:"numeric"}).format(new Date(ds+"T00:00:00Z"));
 const hfmt=ds=>{try{return new Intl.DateTimeFormat("ar-SA-u-ca-islamic-umalqura",{timeZone:"UTC",day:"numeric",month:"long",year:"numeric"}).format(new Date(ds+"T00:00:00Z"))}catch(e){return""}};
@@ -416,7 +489,7 @@ function studentPdfHtml(n){
  const all=[];for(let d=new Date(START+"T00:00:00");iso(d)<=EFF;d.setDate(d.getDate()+1))all.push({ds:iso(d),i:dayIdx(d)});
  const st=stat(n,all),byd={};reports.filter(r=>r.name===n).forEach(r=>byd[r.date]=r);
  const body=all.map(d=>{const r=byd[d.ds],x={r,kind:kindP(r,d.i)};return r?`<tr><td class="nm">${DAYS[d.i]} ${d.ds.slice(5)}</td>${KEYS.map(k=>pcell(k,d.i,r)).join("")}${pstat(x)}</tr>`:`<tr><td class="nm">${DAYS[d.i]} ${d.ds.slice(5)}</td><td class="bad" colspan="5"><span class="chip">لم يقرأ ورده</span></td></tr>`}).join("");
- return PDOC(PHEAD("سجلّ الطالب",esc(n))+`<div class="sum"><div style="background:var(--okbg);color:var(--ok)">${st.sent}/${all.length}<small>أيام الإرسال</small></div><div style="background:var(--badbg);color:var(--bad)">${st.miss.length}<small>أيام لم يقرأ فيها ورده</small></div><div style="background:var(--warnbg);color:var(--warn)">${st.pct}%<small>نسبة الإنجاز</small></div></div><table><thead><tr><th>التاريخ</th>${KEYS.map(k=>`<th>${LBL[k]}</th>`).join("")}<th>الحالة</th></tr></thead><tbody>${body}</tbody></table>`)}
+ return PDOC(PHEAD("سجلّ الطالب",esc(n))+`<div class="sum"><div style="background:var(--okbg);color:var(--ok)">${st.sent}/${all.length}<small>أيام الإرسال</small></div><div style="background:var(--badbg);color:var(--bad)">${st.miss.length}<small>أيام لم يقرأ فيها ورده</small></div><div style="background:var(--warnbg);color:var(--warn)">${st.pct}%<small>نسبة الإنجاز</small></div></div>${calHtml(ds=>{const r=byd[ds];if(!r)return"miss";return kindOf(r,dayIdx(new Date(ds+"T00:00:00")))[0]==="s-ok"?"full":"part"},START,EFF)}${calLegend(true)}<table><thead><tr><th>التاريخ</th>${KEYS.map(k=>`<th>${LBL[k]}</th>`).join("")}<th>الحالة</th></tr></thead><tbody>${body}</tbody></table>`)}
 function schedPdfHtml(){
  const b=new Date(wkStart+"T00:00:00");
  const body=DAYS.map((d,i)=>{const x=new Date(b);x.setDate(b.getDate()+i);const cl=[1,5,6].includes(i)?"g":i===3?"e":"";return`<tr class="${cl}"><td class="dy">${d}<br><small>${iso(x).slice(5)}</small></td><td>${esc(SCHED[i].t)}</td><td>${esc(SCHED[i].q)}</td><td>${esc(SCHED[i].k)}</td><td>${esc(SCHED[i].l)}</td></tr>`}).join("");
@@ -477,7 +550,8 @@ function detailView(){
  <div class="v">أيام الإرسال: <b>${st.sent}</b> من ${all.length} — الغياب: <b class="bad">${st.miss.length}</b> — التأخر: <b>${st.late}</b></div>
  <div style="margin-top:8px">نسبة الإنجاز: ${st.pct}%<div class="bar"><i style="width:${st.pct}%"></i></div></div></div>`;
  if(!all.length)return h+`<div class="card msg">لم يبدأ البرنامج بعد</div>`;
- h+=`<div class="card">${detailCards(all,byd)}<div class="sc pt"><table><tr><th>التاريخ</th>${KEYS.map(k=>`<th>${LBL[k]}</th>`).join("")}<th></th><th class="noprint"></th></tr>`;
+ h+=`<div class="card noprint"><div class="t tt">التقويم</div>${calHtml(ds=>{const r=byd[ds];if(!r)return"miss";return kindOf(r,dayIdx(new Date(ds+"T00:00:00")))[0]==="s-ok"?"full":"part"},START,EFF)}${calLegend(true)}</div>
+ <div class="card">${detailCards(all,byd)}<div class="sc pt"><table><tr><th>التاريخ</th>${KEYS.map(k=>`<th>${LBL[k]}</th>`).join("")}<th></th><th class="noprint"></th></tr>`;
 all.slice().reverse().forEach(d=>{const r=byd[d.ds];
   if(!r){h+=`<tr><td>${DAYS[d.i]} ${d.ds.slice(5)}</td><td class="bad" colspan="6"><span class="chip">لم يقرأ ورده</span></td></tr>`;return}
   h+=`<tr><td>${DAYS[d.i]} ${d.ds.slice(5)}</td>${KEYS.map(k=>k in r.v?cell(k,d.i,r.v[k]):"<td>—</td>").join("")}<td class="${r.late?"warn":"ok"}"><span class="chip">${r.late?"متأخر":"أرسل"}</span></td><td class="noprint"><button class="s g" data-n="${esc(n)}" data-d="${d.ds}" onclick="delReport(this.dataset.n,this.dataset.d)">🗑</button></td></tr>`});
@@ -502,6 +576,7 @@ async function delStudent(n){
  if(history.state&&history.state.snap&&history.state.snap.detail)history.back();else detail="";await loadAdmin()}
 function settingsView(){
  let h=`<div class="card"><div class="t">تاريخ بداية البرنامج</div><div class="v" style="margin-bottom:6px">لا يُحتسب أي يوم قبله في الإحصائيات</div><input type="date" id="st" value="${START}"></div>
+ <div class="card"><div class="t">تاريخ بداية رمضان</div><div class="v" style="margin-bottom:6px">يظهر للطلاب عدّاد «باقٍ على رمضان N يومًا». اتركه فارغًا لإخفائه.</div><input type="date" id="rm_in" value="${RAMADAN||""}"></div>
  <div class="card"><div class="t">جدول الأسبوع</div><div class="v">اترك الخانة فارغة إن لم يكن هناك ورد في ذلك اليوم</div>`;
  DAYS.forEach((d,i)=>{h+=`<div class="dh">${d}</div>`+KEYS.map(k=>`<label>${LBL[k]}</label><input type="text" id="sc_${i}_${k}" value="${esc(SCHED[i][k]||"")}">`).join("")});
  return h+`</div><button onclick="saveSet()">حفظ الإعدادات</button><div style="height:8px"></div><button class="g" onclick="openSched()">📄 جدول الأسبوع PDF</button><div style="height:8px"></div><button class="g" onclick="history.back()">صفحة الطالب</button><div class="v" style="margin-top:8px">احفظ الإعدادات أولًا ثم افتح جدول الأسبوع.</div>`}
@@ -515,9 +590,10 @@ function schedView(){
 async function saveSet(){
  const st=$("st").value;if(!st){alert("اختر تاريخ البداية");return}
  const arr=DAYS.map((d,i)=>{const o={};KEYS.forEach(k=>o[k]=norm($("sc_"+i+"_"+k).value));return o});
- const {error}=await sb.from("settings").upsert([{key:"start",value:st},{key:"schedule",value:arr}]);
+ const rm=$("rm_in").value||"";
+ const {error}=await sb.from("settings").upsert([{key:"start",value:st},{key:"schedule",value:arr},{key:"ramadan",value:rm}]);
  if(error){alert("تعذّر الحفظ، تأكد من تنفيذ كود SQL الجديد");return}
- START=st;SCHED=arr;alert("تم الحفظ ✅");render()}
+ START=st;SCHED=arr;RAMADAN=rm;alert("تم الحفظ ✅");render()}
 document.addEventListener("visibilitychange",()=>{if(document.hidden)return;if(iso(new Date())!==TD&&page==="student"){location.reload();return}flushQ();checkUpdate()});
 window.addEventListener("online",flushQ);
 setInterval(()=>{if(qGet().length)flushQ()},30000);
