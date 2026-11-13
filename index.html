@@ -82,7 +82,7 @@ tr:nth-child(even) td:has(>.nm){background:var(--stripe)}
 .ib{display:flex;justify-content:space-between;align-items:center;gap:6px;background:var(--stripe);border-radius:10px;padding:6px 10px;font-size:12px;color:var(--mu)}
 .pl{display:inline-block;min-width:34px;text-align:center;padding:1px 9px;border-radius:99px;font-weight:700;font-size:12px;background:var(--pr2);color:var(--mu)}
 .pl.ok{background:var(--okbg);color:var(--ok)}.pl.bad{background:var(--badbg);color:var(--bad)}
-.sa{display:flex;margin-top:10px}.sa button{font-size:12px;padding:6px 12px;opacity:.9}.pc{color:var(--pr);font-size:17px}
+.sa{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.sa button{font-size:12px;padding:6px 12px;opacity:.9}.pc{color:var(--pr);font-size:17px}
 .mt{color:var(--mu);font-size:12px;margin-top:8px}.mt b{color:var(--tx)}.ms{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.55);display:grid;place-items:center;padding:20px;z-index:99}
 .hd.mini{padding:calc(env(safe-area-inset-top) + 10px) 16px 20px;border-radius:0 0 50% 50%/0 0 18px 18px}
@@ -234,7 +234,7 @@ function streakMsg(){const n=streak();if(n>=2)return `<div class="streak">🌟 �
 function successView(i){
  let v={};try{v=JSON.parse(localStorage.getItem("tn_d_"+TD+"_"+me)||"{}")}catch(e){}
  return `<div class="card sx hit"><div class="seal">✓</div><div class="st2">${qHas(TD,me)?"تم حفظ تقريرك":"تم إرسال تقريرك"}</div><div class="v">${esc(me)} — ${DAYS[i]}</div><div class="bl">بارك الله فيك وجعله في ميزان حسناتك 🌙</div>${newBadgeNote()}${qHas(TD,me)?'<div class="note" style="margin-bottom:14px">⏳ حُفظ تقريرك على جوالك، وسيصل تلقائيًا عند عودة الاتصال.</div>':''}${streakMsg()}<div class="pi" style="margin:-4px 0 12px"><button class="lnk" onclick="installTap()">📲 سجّل أسرع غدًا بضغطة واحدة: ثبّت التطبيق</button></div><div class="sm">${items(i).map(it=>`<div class="sr"><span>${it[1]}</span>${v[it[0]]==null?"":pl(it[0],i,v[it[0]])}</div>`).join("")}</div><button class="g" onclick="startEdit()">↩ تعديل إجاباتي</button><div style="height:8px"></div><button class="g" onclick="myLog()">📅 سجلّي وشاراتي</button></div>`}
-const BUILD="28";
+const BUILD="29";
 function toast(msg,label,fn){let t=$("tb");if(!t){t=document.createElement("div");t.id="tb";t.className="tb noprint";document.body.appendChild(t)}
  t.innerHTML=`<span style="flex:1">${msg}</span>${label?`<button class="s" id="tbb">${label}</button>`:""}<button class="s g" id="tbx">✕</button>`;
  $("tbx").onclick=()=>t.remove();if(label)$("tbb").onclick=()=>{t.remove();fn()};
@@ -293,27 +293,37 @@ const BADGES=[
  {id:"t5",ic:"📖",n:"ورد التثبيت كاملًا 5 مرات",need:5,val:s=>s.t},
  {id:"f10",ic:"🕌",n:"10 أيام بأوراد كاملة",need:10,val:s=>s.full},
  {id:"f30",ic:"💎",n:"30 يومًا بأوراد كاملة",need:30,val:s=>s.full}];
-function myStats(){
- const days={};let t=0;
+function localRecs(){
+ const out=[];
  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);
   if(!k||!k.startsWith("tn_d_")||k.slice(15)!=="_"+me)continue;
-  const ds=k.slice(5,15);if(!/^\d{4}-\d{2}-\d{2}$/.test(ds)||ds<START)continue;
-  let v;try{v=JSON.parse(localStorage.getItem(k))}catch(e){continue}if(!v)continue;
-  const di=dayIdx(new Date(ds+"T00:00:00")),its=items(di);
-  days[ds]=its.length&&its.every(it=>okv(it[0],di,v[it[0]]))?"full":"part";
-  if(v.t!=null&&okv("t",di,v.t))t++}
+  const ds=k.slice(5,15);if(!/^\d{4}-\d{2}-\d{2}$/.test(ds))continue;
+  try{const v=JSON.parse(localStorage.getItem(k));if(v)out.push({ds,v})}catch(e){}}
+ return out}
+async function loadRecs(){
+ let rows=null;
+ try{const {data,error}=await sb.rpc("my_log",{p_name:me});if(!error&&Array.isArray(data))rows=data}catch(e){}
+ const map=new Map();
+ (rows||[]).forEach(r=>map.set(r.report_date,{ds:r.report_date,v:r.v,late:r.late}));
+ localRecs().forEach(r=>{if(!map.has(r.ds))map.set(r.ds,r)});
+ return{recs:[...map.values()].filter(r=>r.ds>=START),online:!!rows}}
+function statsFrom(recs){
+ const days={};let t=0;
+ recs.forEach(r=>{const di=dayIdx(new Date(r.ds+"T00:00:00")),its=items(di);
+  days[r.ds]=its.length&&its.every(it=>okv(it[0],di,r.v[it[0]]))?"full":"part";
+  if(r.v.t!=null&&okv("t",di,r.v.t))t++});
  const ds=Object.keys(days).sort();let best=0,run=0,prev=null;
  ds.forEach(d=>{if(days[d]==="full"){run=prev&&Math.round((new Date(d+"T00:00:00")-new Date(prev+"T00:00:00"))/86400000)===1?run+1:1;prev=d;best=Math.max(best,run)}else{run=0;prev=null}});
  let cur=0;const d=new Date(today);if(days[iso(d)]!=="full")d.setDate(d.getDate()-1);
  while(days[iso(d)]==="full"){cur++;d.setDate(d.getDate()-1)}
  return{days,sent:ds.length,full:ds.filter(d=>days[d]==="full").length,best,cur,t}}
-function awardBadges(){
- try{const st=myStats(),earned=BADGES.filter(b=>b.val(st)>=b.need).map(b=>b.id);
-  const key="tn_bd_"+me;let old=[];try{old=JSON.parse(localStorage.getItem(key)||"[]")}catch(e){}
-  const nw=earned.filter(x=>!old.includes(x));
+async function awardBadges(){
+ try{const {recs}=await loadRecs(),st=statsFrom(recs),earned=BADGES.filter(b=>b.val(st)>=b.need).map(b=>b.id);
+  const key="tn_bd_"+me,had=localStorage.getItem(key);let old=[];try{old=JSON.parse(had||"[]")}catch(e){}
+  const nw=(had===null&&st.sent>1)?[]:earned.filter(x=>!old.includes(x));
   localStorage.setItem(key,JSON.stringify(earned));
   localStorage.setItem("tn_bn_"+TD+"_"+me,JSON.stringify(nw));
-  if(nw.length)buzz([40,60,40,60,80])}catch(e){}}
+  if(nw.length){buzz([40,60,40,60,80]);if(page==="student")render()}}catch(e){}}
 function newBadgeNote(){
  let nw=[];try{nw=JSON.parse(localStorage.getItem("tn_bn_"+TD+"_"+me)||"[]")}catch(e){}
  const b=BADGES.filter(x=>nw.includes(x.id));
@@ -329,16 +339,38 @@ function calHtml(get,from,to){
   h+=`</div>`}
  return h+`</div>`}
 const calLegend=(adm)=>`<div class="lg2"><span><i class="ce full"></i> أتمّ ورده</span><span><i class="ce part"></i> ناقص أو متأخر</span>${adm?'<span><i class="ce miss"></i> لم يقرأ</span>':'<span><i class="ce none"></i> لا تسجيل على هذا الجهاز</span>'}</div>`;
-function myLog(){
+async function myLog(){
  if(!me)return;
- const st=myStats(),to=TD<START?START:TD;
- const bd=BADGES.map(b=>{const v=b.val(st),on=v>=b.need;return`<div class="bd ${on?"on":"off"}"><b>${b.ic}</b>${b.n}<small>${on?"✓ حصلت عليها":Math.min(v,b.need)+" / "+b.need}</small></div>`}).join("");
- const cal=TD<START?`<div class="msg">يبدأ البرنامج بإذن الله</div>`:calHtml(ds=>st.days[ds],START,to)+calLegend(false);
+ ovShow(`<div class="msg">جارٍ تحميل سجلّك…</div>`);
+ const {recs,online}=await loadRecs(),st=statsFrom(recs),to=TD<START?START:TD;
+ const bd=BADGES.map(b=>{const v=b.val(st),on=v>=b.need;return`<div class="bd ${on?"on":"off"}"><b>${b.ic}</b>${b.n}<small>${on?"✓ حصلت عليها":Math.min(v,b.need)+" من "+b.need}</small></div>`}).join("");
+ const get=ds=>st.days[ds]||(online&&ds<TD?"miss":"none");
+ const cal=TD<START?`<div class="msg">يبدأ البرنامج بإذن الله</div>`:calHtml(get,START,to)+calLegend(online);
  const rt=ramText();
  ovShow(`<div class="t" style="text-align:center;font-size:18px">📅 سجلّي — ${esc(me)}</div>${rt?`<div class="note" style="margin:10px 0 4px;text-align:center">${rt}</div>`:""}
  <div class="st3"><div><b>${st.sent}</b>أيام مسجّلة</div><div><b>${st.full}</b>أيام كاملة</div><div><b>${st.cur}</b>السلسلة الحالية</div><div><b>${st.best}</b>أطول سلسلة</div></div>
  ${cal}<div class="t" style="margin:12px 0 2px">🏅 شاراتي</div><div class="bg">${bd}</div>
- <div class="v" style="font-size:12px;margin-bottom:10px">يعرض هذا السجل ما سُجّل من هذا الجهاز.</div><button onclick="ovClose()">إغلاق</button>`)}
+ <div class="v" style="font-size:12px;margin-bottom:10px">${online?"يعرض هذا السجل كل ما سُجّل باسمك منذ بداية البرنامج، من أي جهاز.":"تعذّر الاتصال بالإنترنت، فيعرض ما سُجّل من هذا الجهاز فقط."}</div><button onclick="ovClose()">إغلاق</button>`)}
+let aform=null;
+function adminEntry(n,ds){
+ const day=dayIdx(new Date(ds+"T00:00:00")),r=reports.find(x=>x.name===n&&x.date===ds);
+ aform={n,ds,day,v:Object.assign({},r&&r.v),late:r?!!r.late:true,exists:!!r};aformShow()}
+function aformShow(){
+ const f=aform,its=items(f.day),sc=document.querySelector("#ov>.card"),top=sc?sc.scrollTop:0;
+ let h=`<div class="t" style="text-align:center;font-size:17px">${f.exists?"✏️ تعديل ورد":"➕ إدخال ورد متأخر"}</div><div class="v" style="text-align:center;margin-bottom:8px">${esc(f.n)} — ${DAYS[f.day]} ${f.ds}</div>`;
+ its.forEach(it=>{const [k,l,v,mx]=it,cur=f.v[k];
+  h+=`<div class="it" style="padding:10px 0"><div class="t">${l}</div><div class="v">${esc(v)}</div><div class="row">`;
+  if(mx){for(let q=0;q<=mx;q++)h+=`<button class="${cur===q?"on":""}" onclick="aset('${k}',${q})">${q}</button>`}
+  else h+=`<button class="${cur===1?"on":""}" onclick="aset('${k}',1)">نعم</button><button class="${cur===0?"on":""}" onclick="aset('${k}',0)">لا</button>`;
+  h+=`</div></div>`});
+ h+=`<label style="display:flex;gap:8px;align-items:center;margin:10px 0;color:var(--tx)"><input type="checkbox" style="width:auto;margin:0" ${f.late?"checked":""} onchange="aform.late=this.checked"> يُحتسب «متأخرًا»</label><button onclick="asave()">حفظ</button><div style="height:8px"></div><button class="g" onclick="ovClose()">إلغاء</button>`;
+ ovShow(h);const c=document.querySelector("#ov>.card");if(c)c.scrollTop=top}
+function aset(k,n){aform.v[k]=n;aformShow()}
+async function asave(){
+ const f=aform;if(items(f.day).some(it=>f.v[it[0]]==null)){alert("أجب عن كل الخانات أولًا");return}
+ const {error}=await sb.rpc("admin_set_report",{p_name:f.n,p_date:f.ds,p_day:f.day,p_v:f.v,p_late:!!f.late});
+ if(error){alert("تعذّر الحفظ، تأكد من تنفيذ كود SQL الجديد");return}
+ ovClose();await loadAdmin()}
 let lastK="";
 function setv(k,n){buzz(n>0?12:[8,30,8]);const i=dayIdx(today),first=items(i).find(it=>draft.v[it[0]]==null);draft.v[k]=n;lastK=k;if(n===0||n===maxOf(k,i))delete ex[k];render();
  if(first&&first[0]===k){const nx=items(i).find(it=>draft.v[it[0]]==null);if(nx)setTimeout(()=>{const e=$("it_"+nx[0]);if(e)e.scrollIntoView({behavior:"smooth",block:"center"})},200)}}
@@ -376,8 +408,9 @@ async function save(){
  busy=false;
  if(error&&error.code){alert((error.message||"").includes("old date")?"لا يمكن إدخال ورد يوم مضى":"تعذّر الإرسال، حاول مرة أخرى");render();return}
  if(error)qAdd(rec);else qDrop(rec);
- localStorage.setItem("tn_s_"+draft.id,"1");localStorage.setItem("tn_d_"+draft.id,JSON.stringify(draft.v));editing=false;awardBadges();buzz([25,40,25]);render();window.scrollTo(0,0);
+ localStorage.setItem("tn_s_"+draft.id,"1");localStorage.setItem("tn_d_"+draft.id,JSON.stringify(draft.v));editing=false;buzz([25,40,25]);render();window.scrollTo(0,0);
  if(history.state&&history.state.snap&&history.state.snap.editing)history.back();
+ awardBadges();
  if(error)setTimeout(flushQ,15000)}
 // ---------- admin
 function goAdmin(){page=authed?"admin":"login";navPush();if(authed)loadAdmin();render()}
@@ -431,11 +464,11 @@ const LIM=5,expd={};
 function tgl(k){expd[k]=!expd[k];render()}
 function more2(cards,key){const open=expd[key],rest=cards.length-LIM;return (open?cards:cards.slice(0,LIM)).join("")+(cards.length>LIM?`<button class="g mr" data-k="${esc(key)}" onclick="tgl(this.dataset.k)">${open?"عرض أقل ▲":"عرض المزيد ("+rest+" أخرى) ▼"}</button>`:"")}
 function dailyCards(rows,i,ds,used){return `<div class="sv">`+more2(rows.map((x,j)=>{const [t,c,l]=kindOf(x.r,i);
- return `<div class="st ${t}"><div class="sh"><span class="ix">${j+1}</span>${nmLink(x.n)}<span class="chip ${c}">${l}</span></div>${x.r?igrid(x.r,i,used):""}<div class="sa noprint">${x.r?`<button class="s g" data-n="${esc(x.n)}" data-d="${ds}" onclick="delReport(this.dataset.n,this.dataset.d)">🗑 حذف التقرير</button>`:`<button class="s g bad" data-n="${esc(x.n)}" onclick="delStudent(this.dataset.n)">حذف الطالب</button>`}</div></div>`}),"d"+ds)+`</div>`}
+ return `<div class="st ${t}"><div class="sh"><span class="ix">${j+1}</span>${nmLink(x.n)}<span class="chip ${c}">${l}</span></div>${x.r?igrid(x.r,i,used):""}<div class="sa noprint">${x.r?`<button class="s g" data-n="${esc(x.n)}" data-d="${ds}" onclick="adminEntry(this.dataset.n,this.dataset.d)">✏️ تعديل</button><button class="s g" data-n="${esc(x.n)}" data-d="${ds}" onclick="delReport(this.dataset.n,this.dataset.d)">🗑 حذف التقرير</button>`:`<button class="s" data-n="${esc(x.n)}" data-d="${ds}" onclick="adminEntry(this.dataset.n,this.dataset.d)">➕ إدخال ورد</button><button class="s g bad" data-n="${esc(x.n)}" onclick="delStudent(this.dataset.n)">حذف الطالب</button>`}</div></div>`}),"d"+ds)+`</div>`}
 function weekCards(rows,days){return `<div class="sv">`+more2(rows.map((r,j)=>{const t=r.pct>=80?"s-ok":r.pct>=40?"s-warn":"s-bad";
  return `<div class="st ${t}"><div class="sh"><span class="ix">${j+1}</span>${nmLink(r.n)}<b class="pc">${r.pct}%</b></div><div class="bar" style="margin-top:8px"><i style="width:${r.pct}%"></i></div><div class="mt">أيام الإرسال <b>${r.sent}/${days.length}</b> • التأخر <b>${r.late}</b></div>${r.miss.length?`<div class="mt">أيام لم يقرأ فيها ورده:</div><div class="ms">${r.miss.map(d=>`<span class="chip c-bad">${DAYS[d.i]} ${d.ds.slice(5)}</span>`).join("")}</div>`:""}</div>`}),"w"+period)+`</div>`}
 function detailCards(all,byd){return `<div class="sv">`+more2(all.slice().reverse().map(d=>{const r=byd[d.ds],[t,c,l]=kindOf(r,d.i);
- return `<div class="st ${t}"><div class="sh"><span class="dt">${DAYS[d.i]} ${d.ds.slice(5)}</span><span class="chip ${c}">${l}</span></div>${r?igrid(r,d.i,KEYS.filter(k=>k in r.v))+`<div class="sa noprint"><button class="s g" data-n="${esc(detail)}" data-d="${d.ds}" onclick="delReport(this.dataset.n,this.dataset.d)">🗑 حذف التقرير</button></div>`:""}</div>`}),"s"+detail)+`</div>`}
+ return `<div class="st ${t}"><div class="sh"><span class="dt">${DAYS[d.i]} ${d.ds.slice(5)}</span><span class="chip ${c}">${l}</span></div>${r?igrid(r,d.i,KEYS.filter(k=>k in r.v))+`<div class="sa noprint"><button class="s g" data-n="${esc(detail)}" data-d="${d.ds}" onclick="adminEntry(this.dataset.n,this.dataset.d)">✏️ تعديل</button><button class="s g" data-n="${esc(detail)}" data-d="${d.ds}" onclick="delReport(this.dataset.n,this.dataset.d)">🗑 حذف التقرير</button></div>`:`<div class="sa noprint"><button class="s" data-n="${esc(detail)}" data-d="${d.ds}" onclick="adminEntry(this.dataset.n,this.dataset.d)">➕ إدخال ورد</button></div>`}</div>`}),"s"+detail)+`</div>`}
 const H2C="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js",JSPDF="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js";
 const PDFCSS=`:root{--pr:#0E5C4E;--gold:#B8923A;--gold2:#F6EEDA;--bd:#D5E1DC;--stripe:#F3F8F6;--mu:#5A6F68;--ok:#0E5C4E;--okbg:#DAEEE6;--bad:#A8432F;--badbg:#F8E5E0;--warn:#85570A;--warnbg:#F8EAC6}
 *{box-sizing:border-box}html,body{margin:0;background:#fff}
