@@ -234,7 +234,7 @@ function streakMsg(){const n=streak();if(n>=2)return `<div class="streak">🌟 �
 function successView(i){
  let v={};try{v=JSON.parse(localStorage.getItem("tn_d_"+TD+"_"+me)||"{}")}catch(e){}
  return `<div class="card sx hit"><div class="seal">✓</div><div class="st2">${qHas(TD,me)?"تم حفظ تقريرك":"تم إرسال تقريرك"}</div><div class="v">${esc(me)} — ${DAYS[i]}</div><div class="bl">بارك الله فيك وجعله في ميزان حسناتك 🌙</div>${newBadgeNote()}${qHas(TD,me)?'<div class="note" style="margin-bottom:14px">⏳ حُفظ تقريرك على جوالك، وسيصل تلقائيًا عند عودة الاتصال.</div>':''}${streakMsg()}<div class="pi" style="margin:-4px 0 12px"><button class="lnk" onclick="installTap()">📲 سجّل أسرع غدًا بضغطة واحدة: ثبّت التطبيق</button></div><div class="sm">${items(i).map(it=>`<div class="sr"><span>${it[1]}</span>${v[it[0]]==null?"":pl(it[0],i,v[it[0]])}</div>`).join("")}</div><button class="g" onclick="startEdit()">↩ تعديل إجاباتي</button><div style="height:8px"></div><button class="g" onclick="myLog()">📅 سجلّي وشاراتي</button></div>`}
-const BUILD="29";
+const BUILD="30";
 function toast(msg,label,fn){let t=$("tb");if(!t){t=document.createElement("div");t.id="tb";t.className="tb noprint";document.body.appendChild(t)}
  t.innerHTML=`<span style="flex:1">${msg}</span>${label?`<button class="s" id="tbb">${label}</button>`:""}<button class="s g" id="tbx">✕</button>`;
  $("tbx").onclick=()=>t.remove();if(label)$("tbb").onclick=()=>{t.remove();fn()};
@@ -351,6 +351,13 @@ async function myLog(){
  <div class="st3"><div><b>${st.sent}</b>أيام مسجّلة</div><div><b>${st.full}</b>أيام كاملة</div><div><b>${st.cur}</b>السلسلة الحالية</div><div><b>${st.best}</b>أطول سلسلة</div></div>
  ${cal}<div class="t" style="margin:12px 0 2px">🏅 شاراتي</div><div class="bg">${bd}</div>
  <div class="v" style="font-size:12px;margin-bottom:10px">${online?"يعرض هذا السجل كل ما سُجّل باسمك منذ بداية البرنامج، من أي جهاز.":"تعذّر الاتصال بالإنترنت، فيعرض ما سُجّل من هذا الجهاز فقط."}</div><button onclick="ovClose()">إغلاق</button>`)}
+function lateAdd(){
+ const all=[...new Set([...students,...reports.map(r=>r.name)])].sort((a,b)=>a.localeCompare(b,"ar"));
+ ovShow(`<div class="t" style="text-align:center;font-size:17px;margin-bottom:8px">➕ إدخال ورد متأخر</div>
+ <label>الطالب</label><select id="la_n">${all.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("")}</select>
+ <label>اليوم</label><input type="date" id="la_d" value="${EFF<START?START:EFF}" min="${START}" max="${TD}">
+ <button class="cta" onclick="lateGo()">متابعة</button><div style="height:8px"></div><button class="g" onclick="ovClose()">إلغاء</button>`)}
+function lateGo(){const n=$("la_n").value,d=$("la_d").value;if(!n||!d){alert("اختر الطالب واليوم");return}if(d<START||d>TD){alert("اختر يومًا ضمن مدة البرنامج");return}adminEntry(n,d)}
 let aform=null;
 function adminEntry(n,ds){
  const day=dayIdx(new Date(ds+"T00:00:00")),r=reports.find(x=>x.name===n&&x.date===ds);
@@ -443,7 +450,7 @@ function adminView(){
  if(!all.length)return h+`<div class="card msg">لا يوجد طلاب بعد</div>`+foot;
  if(period==="day"){
   const ds=viewDate,i=dayIdx(new Date(ds+"T00:00:00"));
-  h+=`<div class="noprint"><label>اختر التاريخ</label><input type="date" value="${ds}" onchange="viewDate=this.value||EFF;render()">${EFF!==TD?'<div class="v" style="margin:-2px 0 8px">يعرض نتائج أمس حتى الساعة 12 ظهرًا</div>':''}</div>`;
+  h+=`<div class="noprint"><label>اختر التاريخ</label><input type="date" value="${ds}" onchange="viewDate=this.value||EFF;render()">${EFF!==TD?'<div class="v" style="margin:-2px 0 8px">يعرض نتائج أمس حتى الساعة 12 ظهرًا</div>':''}<button class="g" style="margin:2px 0 12px" onclick="lateAdd()">➕ إدخال ورد متأخر لطالب</button></div>`;
   if(ds<START)return h+`<div class="card msg">قبل بداية البرنامج (${fmt(START)})</div>`+foot;
   const rep=n=>reports.find(x=>x.date===ds&&x.name===n);
   const used=KEYS.filter(k=>(SCHED[i][k]&&String(SCHED[i][k]).trim())||reports.some(r=>r.date===ds&&k in r.v));
@@ -464,11 +471,11 @@ const LIM=5,expd={};
 function tgl(k){expd[k]=!expd[k];render()}
 function more2(cards,key){const open=expd[key],rest=cards.length-LIM;return (open?cards:cards.slice(0,LIM)).join("")+(cards.length>LIM?`<button class="g mr" data-k="${esc(key)}" onclick="tgl(this.dataset.k)">${open?"عرض أقل ▲":"عرض المزيد ("+rest+" أخرى) ▼"}</button>`:"")}
 function dailyCards(rows,i,ds,used){return `<div class="sv">`+more2(rows.map((x,j)=>{const [t,c,l]=kindOf(x.r,i);
- return `<div class="st ${t}"><div class="sh"><span class="ix">${j+1}</span>${nmLink(x.n)}<span class="chip ${c}">${l}</span></div>${x.r?igrid(x.r,i,used):""}<div class="sa noprint">${x.r?`<button class="s g" data-n="${esc(x.n)}" data-d="${ds}" onclick="adminEntry(this.dataset.n,this.dataset.d)">✏️ تعديل</button><button class="s g" data-n="${esc(x.n)}" data-d="${ds}" onclick="delReport(this.dataset.n,this.dataset.d)">🗑 حذف التقرير</button>`:`<button class="s" data-n="${esc(x.n)}" data-d="${ds}" onclick="adminEntry(this.dataset.n,this.dataset.d)">➕ إدخال ورد</button><button class="s g bad" data-n="${esc(x.n)}" onclick="delStudent(this.dataset.n)">حذف الطالب</button>`}</div></div>`}),"d"+ds)+`</div>`}
+ return `<div class="st ${t}"><div class="sh"><span class="ix">${j+1}</span>${nmLink(x.n)}<span class="chip ${c}">${l}</span></div>${x.r?igrid(x.r,i,used):""}<div class="sa noprint">${x.r?`<button class="s g" data-n="${esc(x.n)}" data-d="${ds}" onclick="adminEntry(this.dataset.n,this.dataset.d)">✏️ تعديل</button><button class="s g" data-n="${esc(x.n)}" data-d="${ds}" onclick="delReport(this.dataset.n,this.dataset.d)">🗑 حذف التقرير</button>`:`<button class="s" data-n="${esc(x.n)}" data-d="${ds}" onclick="adminEntry(this.dataset.n,this.dataset.d)">➕ إدخال ورد متأخر</button><button class="s g bad" data-n="${esc(x.n)}" onclick="delStudent(this.dataset.n)">حذف الطالب</button>`}</div></div>`}),"d"+ds)+`</div>`}
 function weekCards(rows,days){return `<div class="sv">`+more2(rows.map((r,j)=>{const t=r.pct>=80?"s-ok":r.pct>=40?"s-warn":"s-bad";
  return `<div class="st ${t}"><div class="sh"><span class="ix">${j+1}</span>${nmLink(r.n)}<b class="pc">${r.pct}%</b></div><div class="bar" style="margin-top:8px"><i style="width:${r.pct}%"></i></div><div class="mt">أيام الإرسال <b>${r.sent}/${days.length}</b> • التأخر <b>${r.late}</b></div>${r.miss.length?`<div class="mt">أيام لم يقرأ فيها ورده:</div><div class="ms">${r.miss.map(d=>`<span class="chip c-bad">${DAYS[d.i]} ${d.ds.slice(5)}</span>`).join("")}</div>`:""}</div>`}),"w"+period)+`</div>`}
 function detailCards(all,byd){return `<div class="sv">`+more2(all.slice().reverse().map(d=>{const r=byd[d.ds],[t,c,l]=kindOf(r,d.i);
- return `<div class="st ${t}"><div class="sh"><span class="dt">${DAYS[d.i]} ${d.ds.slice(5)}</span><span class="chip ${c}">${l}</span></div>${r?igrid(r,d.i,KEYS.filter(k=>k in r.v))+`<div class="sa noprint"><button class="s g" data-n="${esc(detail)}" data-d="${d.ds}" onclick="adminEntry(this.dataset.n,this.dataset.d)">✏️ تعديل</button><button class="s g" data-n="${esc(detail)}" data-d="${d.ds}" onclick="delReport(this.dataset.n,this.dataset.d)">🗑 حذف التقرير</button></div>`:`<div class="sa noprint"><button class="s" data-n="${esc(detail)}" data-d="${d.ds}" onclick="adminEntry(this.dataset.n,this.dataset.d)">➕ إدخال ورد</button></div>`}</div>`}),"s"+detail)+`</div>`}
+ return `<div class="st ${t}"><div class="sh"><span class="dt">${DAYS[d.i]} ${d.ds.slice(5)}</span><span class="chip ${c}">${l}</span></div>${r?igrid(r,d.i,KEYS.filter(k=>k in r.v))+`<div class="sa noprint"><button class="s g" data-n="${esc(detail)}" data-d="${d.ds}" onclick="adminEntry(this.dataset.n,this.dataset.d)">✏️ تعديل</button><button class="s g" data-n="${esc(detail)}" data-d="${d.ds}" onclick="delReport(this.dataset.n,this.dataset.d)">🗑 حذف التقرير</button></div>`:`<div class="sa noprint"><button class="s" data-n="${esc(detail)}" data-d="${d.ds}" onclick="adminEntry(this.dataset.n,this.dataset.d)">➕ إدخال ورد متأخر</button></div>`}</div>`}),"s"+detail)+`</div>`}
 const H2C="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js",JSPDF="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js";
 const PDFCSS=`:root{--pr:#0E5C4E;--gold:#B8923A;--gold2:#F6EEDA;--bd:#D5E1DC;--stripe:#F3F8F6;--mu:#5A6F68;--ok:#0E5C4E;--okbg:#DAEEE6;--bad:#A8432F;--badbg:#F8E5E0;--warn:#85570A;--warnbg:#F8EAC6}
 *{box-sizing:border-box}html,body{margin:0;background:#fff}
